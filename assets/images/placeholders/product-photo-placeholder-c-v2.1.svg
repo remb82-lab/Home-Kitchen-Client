@@ -1,0 +1,15 @@
+<svg width="400" height="500" viewBox="0 0 400 500" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Фото скоро — заглушка товара Home-Kitchen</title>
+  <desc id="desc">Нейтральная заглушка C v2.1: абстрактная прозрачная упаковка со знаком заморозки и маркировкой Фото скоро.</desc>
+  <rect width="400" height="500" rx="28" fill="#F7F4ED"/>
+  <g opacity="0.52">
+    <path d="M104 104C104 92.954 112.954 84 124 84H276C287.046 84 296 92.954 296 104V390C296 401.046 287.046 410 276 410H124C112.954 410 104 401.046 104 390V104Z" fill="#FFFFFF" stroke="#D7D9D4" stroke-width="2"/>
+    <path d="M118 108H282" stroke="#C9CCC7" stroke-width="3" stroke-linecap="round"/>
+    <path d="M120 118H280" stroke="#E0E2DE" stroke-width="2" stroke-linecap="round"/>
+    <g fill="#DADCD8">
+      <circle cx="153" cy="188" r="27"/><circle cx="207" cy="177" r="31"/><circle cx="251" cy="207" r="25"/><circle cx="173" cy="240" r="32"/><circle cx="228" cy="244" r="29"/><circle cx="141" cy="298" r="24"/><circle cx="196" cy="302" r="34"/><circle cx="253" cy="294" r="27"/><circle cx="167" cy="354" r="29"/><circle cx="232" cy="351" r="31"/>
+    </g>
+  </g>
+  <g transform="translate(309 24)"><circle cx="31" cy="31" r="31" fill="#FFFFFF" fill-opacity="0.94"/><g stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round"><path d="M31 15V47"/><path d="M17 23L45 39"/><path d="M17 39L45 23"/><path d="M31 15L27 20"/><path d="M31 15L35 20"/><path d="M31 47L27 42"/><path d="M31 47L35 42"/><path d="M17 23L23 24"/><path d="M17 23L20 29"/><path d="M45 39L39 38"/><path d="M45 39L42 33"/><path d="M17 39L23 38"/><path d="M17 39L20 33"/><path d="M45 23L39 24"/><path d="M45 23L42 29"/></g></g>
+  <g transform="translate(144 205)"><circle cx="56" cy="56" r="56" fill="#FFFFFF" fill-opacity="0.96"/><rect x="38" y="29" width="36" height="29" rx="4" stroke="#4B5A50" stroke-width="2"/><circle cx="64" cy="38" r="3" fill="#4B5A50"/><path d="M42 53L51 44L59 51L65 46L70 53" stroke="#4B5A50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="56" y="76" text-anchor="middle" fill="#202420" font-family="Arial, sans-serif" font-size="14" font-weight="700">Фото</text><text x="56" y="93" text-anchor="middle" fill="#202420" font-family="Arial, sans-serif" font-size="14" font-weight="700">скоро</text></g>
+</svg>

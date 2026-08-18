@@ -23,14 +23,42 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Build Pages site with approved Premium UI
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          rsync -a --exclude '.git' --exclude '_site' ./ _site/
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('_site/index.html')
+          html = p.read_text(encoding='utf-8')
+          css = '<link rel="stylesheet" href="premium-client.css?v=20260818">'
+          js = '<script src="premium-client-adapter.js?v=20260818" defer></script>'
+          if css not in html:
+              html = html.replace('</head>', css + '\n</head>', 1)
+          if js not in html:
+              html = html.replace('</body>', js + '\n</body>', 1)
+          p.write_text(html, encoding='utf-8')
+          PY
+          test -s _site/index.html
+          test -s _site/premium-client.css
+          test -s _site/premium-client-adapter.js
+          test -s _site/assets/images/placeholders/product-photo-placeholder-c-v2.1.svg
+          grep -q 'premium-client.css' _site/index.html
+          grep -q 'premium-client-adapter.js' _site/index.html
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
           enablement: true
+
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
+
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
