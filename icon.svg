@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Домашняя кухня">
+  <rect width="512" height="512" rx="112" fill="#faf6ee"/>
+  <circle cx="256" cy="256" r="172" fill="#4c6a3f"/>
+  <path d="M157 247 256 163l99 84v111c0 18-14 32-32 32H189c-18 0-32-14-32-32V247Z" fill="#fffdf8"/>
+  <path d="M209 390v-96c0-17 13-30 30-30h34c17 0 30 13 30 30v96" fill="#e9f1e4"/>
+  <path d="M164 244 256 166l92 78" fill="none" stroke="#fffdf8" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M230 224c0-17 12-30 26-30s26 13 26 30c0 13-7 22-15 28 13 5 23 18 23 34h-68c0-16 10-29 23-34-8-6-15-15-15-28Z" fill="#c96d3c"/>
+</svg>
