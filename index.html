@@ -6,6 +6,10 @@
 <meta name="theme-color" content="#faf6ee">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Домашняя кухня">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./icon.svg">
 <title>Домашняя кухня</title>
 <style>
 :root{--bg:#faf6ee;--card:#fffdf8;--ink:#242a22;--muted:#747970;--line:#e7ded1;--green:#4c6a3f;--green2:#edf4e8;--orange:#c96d3c;--red:#a84a4a;--shadow:0 8px 28px rgba(53,71,46,.08)}
@@ -61,6 +65,8 @@ async function refreshOrders(){if(!orderRefs.length){E.ordersList.innerHTML='<di
 function saveProfile(){profile={name:E.pname.value.trim(),phone:E.pphone.value.trim()};localStorage.setItem('hk_profile',JSON.stringify(profile));toast('Сохранено')}
 async function loadProducts(){E.status.innerHTML='<span class="dot"></span>Загружаю актуальный прайс…';try{const d=await api('catalog');PRODUCTS=Array.isArray(d)?d:(d.items||[]);PRODUCTS=PRODUCTS.map(p=>({...p,price_half:Number(p.price_half)||0,price_kg:Number(p.price_kg)||0}));E.status.innerHTML='<span class="dot ok"></span>Актуальный прайс';if(activeCat!=='Все'&&!PRODUCTS.some(x=>x.category===activeCat))activeCat='Все';renderFilters();renderCatalog();saveCart()}catch(e){console.error(e);E.status.innerHTML='<span class="dot bad"></span>Нет связи с каталогом';E.grid.innerHTML='<div class="notice errorbox" style="grid-column:1/-1">Не удалось загрузить прайс. Проверьте интернет и нажмите «Обновить».</div>';toast('Не удалось загрузить каталог',true)}}
 saveCart();loadProducts();
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('SW registration failed',e)))}
+
 </script>
 </body>
 </html>
