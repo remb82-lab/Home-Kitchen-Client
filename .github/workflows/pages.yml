@@ -2,7 +2,7 @@ name: Deploy Home Kitchen Client
 
 on:
   push:
-    branches: [main]
+    branches: [main, factory/pwa-v1]
   workflow_dispatch:
 
 permissions:
