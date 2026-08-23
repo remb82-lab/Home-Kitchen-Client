@@ -1,0 +1,38 @@
+name: One-shot PWA patch
+
+on:
+  push:
+    branches: [factory/pwa-v1]
+    paths: [.github/workflows/pwa-patch.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: factory/pwa-v1
+      - name: Patch index without changing UI
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          marker='<meta name="apple-mobile-web-app-status-bar-style" content="default">'
+          additions='''<meta name="apple-mobile-web-app-title" content="Домашняя кухня">\n<link rel="manifest" href="./manifest.webmanifest">\n<link rel="icon" href="./icon.svg" type="image/svg+xml">\n<link rel="apple-touch-icon" href="./icon.svg">'''
+          if 'manifest.webmanifest' not in s:
+              s=s.replace(marker, marker+'\n'+additions)
+          register="""\nif('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('SW registration failed',e)))}\n"""
+          if "navigator.serviceWorker.register('./sw.js')" not in s:
+              s=s.replace('saveCart();loadProducts();', 'saveCart();loadProducts();'+register)
+          p.write_text(s,encoding='utf-8')
+          PY
+          rm .github/workflows/pwa-patch.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/pwa-patch.yml
+          git commit -m "feat(pwa): wire manifest and service worker"
+          git push
