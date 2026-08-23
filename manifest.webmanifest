@@ -1,0 +1,20 @@
+{
+  "name": "Домашняя кухня",
+  "short_name": "Домашняя кухня",
+  "description": "Клиентское приложение домашней кухни: каталог, корзина и заказы.",
+  "lang": "ru",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#faf6ee",
+  "theme_color": "#4c6a3f",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
