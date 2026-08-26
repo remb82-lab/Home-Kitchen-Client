@@ -7,6 +7,7 @@ for path in \
   index.html \
   premium-client.css \
   premium-client-adapter.js \
+  kg-only.js \
   manifest.webmanifest \
   icon.svg \
   sw-public.js \
@@ -16,7 +17,7 @@ done
 
 rm -rf "$OUTPUT_ROOT"
 mkdir -p "$OUTPUT_ROOT"
-cp index.html premium-client.css premium-client-adapter.js manifest.webmanifest icon.svg "$OUTPUT_ROOT/"
+cp index.html premium-client.css premium-client-adapter.js kg-only.js manifest.webmanifest icon.svg "$OUTPUT_ROOT/"
 cp sw-public.js "$OUTPUT_ROOT/sw.js"
 rsync -a assets/ "$OUTPUT_ROOT/assets/"
 touch "$OUTPUT_ROOT/.nojekyll"
@@ -46,6 +47,8 @@ if head_parts:
 body_parts = []
 if 'premium-client-adapter.js' not in html:
     body_parts.append('<script src="./premium-client-adapter.js" defer></script>')
+if 'kg-only.js' not in html:
+    body_parts.append('<script src="./kg-only.js" defer></script>')
 if 'data-hk-pwa-registration' not in html:
     body_parts.append("""<script data-hk-pwa-registration>
 if ('serviceWorker' in navigator) {
@@ -68,11 +71,14 @@ test -s "$OUTPUT_ROOT/icon.svg"
 test -s "$OUTPUT_ROOT/sw.js"
 test -s "$OUTPUT_ROOT/premium-client.css"
 test -s "$OUTPUT_ROOT/premium-client-adapter.js"
+test -s "$OUTPUT_ROOT/kg-only.js"
 test -s "$OUTPUT_ROOT/assets/images/placeholders/product-photo-placeholder-c-v2.1.svg"
 grep -q 'client-kitchen' "$OUTPUT_ROOT/index.html"
 grep -q 'rel="manifest"' "$OUTPUT_ROOT/index.html"
 grep -q 'premium-client.css' "$OUTPUT_ROOT/index.html"
 grep -q 'premium-client-adapter.js' "$OUTPUT_ROOT/index.html"
+grep -q 'kg-only.js' "$OUTPUT_ROOT/index.html"
 grep -q 'data-hk-pwa-registration' "$OUTPUT_ROOT/index.html"
 grep -q '"display": "standalone"' "$OUTPUT_ROOT/manifest.webmanifest"
-grep -q 'home-kitchen-client-public-20260826-v2' "$OUTPUT_ROOT/sw.js"
+grep -q 'home-kitchen-client-public-20260826-v3' "$OUTPUT_ROOT/sw.js"
+grep -q 'hk-kg-only-v1' "$OUTPUT_ROOT/kg-only.js"

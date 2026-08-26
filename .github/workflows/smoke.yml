@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'factory/pages-self-contained-twa-*'
+      - 'factory/client-1kg-only-*'
   pull_request:
     branches: [main]
     paths:
@@ -16,6 +17,7 @@ on:
       - 'sw-public.js'
       - 'premium-client.css'
       - 'premium-client-adapter.js'
+      - 'kg-only.js'
       - 'assets/**'
   workflow_dispatch:
 
@@ -51,6 +53,7 @@ jobs:
           test -s _site/index.html
           test -s _site/premium-client.css
           test -s _site/premium-client-adapter.js
+          test -s _site/kg-only.js
           test -s _site/manifest.webmanifest
           test -s _site/icon.svg
           test -s _site/sw.js
@@ -58,9 +61,11 @@ jobs:
           grep -q 'rel="manifest"' _site/index.html
           grep -q 'premium-client.css' _site/index.html
           grep -q 'premium-client-adapter.js' _site/index.html
+          grep -q 'kg-only.js' _site/index.html
           grep -q 'data-hk-pwa-registration' _site/index.html
           grep -q '"display": "standalone"' _site/manifest.webmanifest
-          grep -q 'home-kitchen-client-public-20260826-v2' _site/sw.js
+          grep -q 'home-kitchen-client-public-20260826-v3' _site/sw.js
+          grep -q 'hk-kg-only-v1' _site/kg-only.js
 
       - name: Start static preview
         shell: bash
@@ -84,14 +89,18 @@ jobs:
           set -euo pipefail
           curl -fsS http://127.0.0.1:4173/index.html -o /tmp/home-kitchen-index.html
           grep -q 'rel="manifest"' /tmp/home-kitchen-index.html
+          grep -q 'kg-only.js' /tmp/home-kitchen-index.html
           curl -fsS http://127.0.0.1:4173/manifest.webmanifest -o /tmp/manifest.webmanifest
           grep -q '"display": "standalone"' /tmp/manifest.webmanifest
           curl -fsS http://127.0.0.1:4173/sw.js -o /tmp/sw.js
-          grep -q 'home-kitchen-client-public-20260826-v2' /tmp/sw.js
+          grep -q 'home-kitchen-client-public-20260826-v3' /tmp/sw.js
           curl -fsS http://127.0.0.1:4173/premium-client.css -o /tmp/premium-client.css
           grep -q 'Premium Home Market' /tmp/premium-client.css
           curl -fsS http://127.0.0.1:4173/premium-client-adapter.js -o /tmp/premium-client-adapter.js
           grep -q 'PRODUCT_PLACEHOLDER' /tmp/premium-client-adapter.js
+          curl -fsS http://127.0.0.1:4173/kg-only.js -o /tmp/kg-only.js
+          grep -q 'hk-kg-only-v1' /tmp/kg-only.js
+          grep -q 'grams:1000' /tmp/kg-only.js
 
       - name: Stop static preview
         if: always()

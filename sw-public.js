@@ -1,4 +1,4 @@
-const CACHE='home-kitchen-client-public-20260826-v2';
+const CACHE='home-kitchen-client-public-20260826-v3';
 const APP_SHELL=[
   './',
   './index.html',
@@ -6,6 +6,7 @@ const APP_SHELL=[
   './icon.svg',
   './premium-client.css',
   './premium-client-adapter.js',
+  './kg-only.js',
   './assets/images/placeholders/product-photo-placeholder-c-v2.1.svg'
 ];
 const CATALOG='https://zdxfxyesdlwzpdknapti.supabase.co/functions/v1/client-kitchen?mode=catalog';

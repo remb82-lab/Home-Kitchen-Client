@@ -16,6 +16,7 @@ if (html.includes('SUPABASE_SERVICE_ROLE_KEY')) throw new Error('Service role se
 
 const css = await fs.readFile('premium-client.css', 'utf8');
 const adapter = await fs.readFile('premium-client-adapter.js', 'utf8');
+const kgOnly = await fs.readFile('kg-only.js', 'utf8');
 const placeholder = await fs.readFile('assets/images/placeholders/product-photo-placeholder-c-v2.1.svg', 'utf8');
 const manifest = JSON.parse(await fs.readFile('manifest.webmanifest', 'utf8'));
 const sw = await fs.readFile('sw-public.js', 'utf8');
@@ -25,10 +26,14 @@ const builder = await fs.readFile('scripts/build-public-pwa.sh', 'utf8');
 for (const [name, content, token] of [
   ['premium-client.css', css, 'Premium Home Market'],
   ['premium-client-adapter.js', adapter, 'PRODUCT_PLACEHOLDER'],
+  ['kg-only.js mode marker', kgOnly, 'hk-kg-only-v1'],
+  ['kg-only.js 1kg cart', kgOnly, 'grams:1000'],
+  ['kg-only.js 1kg label', kgOnly, '1 кг'],
   ['placeholder svg', placeholder, 'Фото скоро'],
-  ['service worker', sw, 'home-kitchen-client-public-20260826-v2'],
+  ['service worker', sw, 'home-kitchen-client-public-20260826-v3'],
+  ['service worker kg module', sw, './kg-only.js'],
   ['Pages workflow', pages, 'build-public-pwa.sh'],
-  ['public PWA builder', builder, 'premium-client-adapter.js']
+  ['public PWA builder', builder, 'kg-only.js']
 ]) {
   if (!content.includes(token)) throw new Error(`${name} missing required token: ${token}`);
 }
@@ -44,4 +49,5 @@ const r = await fetch(endpoint, { headers: { accept: 'application/json' } });
 if (!r.ok) throw new Error(`Catalog API failed: ${r.status}`);
 const data = await r.json();
 if (!Array.isArray(data)) throw new Error('Catalog response must be an array');
-console.log(`PASS: self-contained client PWA and catalog API OK; ${data.length} published items.`);
+if (data.some(item => !Number(item.price_kg))) throw new Error('Every published client item must expose a valid 1kg price');
+console.log(`PASS: 1kg-only self-contained client PWA and catalog API OK; ${data.length} published items.`);
