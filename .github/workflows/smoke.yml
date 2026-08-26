@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'factory/pages-self-contained-twa-*'
+      - 'factory/client-1kg-only-*'
   pull_request:
     branches: [main]
     paths:
