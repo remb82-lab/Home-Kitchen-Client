@@ -9,14 +9,15 @@ for path in \
   premium-client-adapter.js \
   manifest.webmanifest \
   icon.svg \
-  sw.js \
+  sw-public.js \
   assets/images/placeholders/product-photo-placeholder-c-v2.1.svg; do
   test -s "$path"
 done
 
 rm -rf "$OUTPUT_ROOT"
 mkdir -p "$OUTPUT_ROOT"
-cp index.html premium-client.css premium-client-adapter.js manifest.webmanifest icon.svg sw.js "$OUTPUT_ROOT/"
+cp index.html premium-client.css premium-client-adapter.js manifest.webmanifest icon.svg "$OUTPUT_ROOT/"
+cp sw-public.js "$OUTPUT_ROOT/sw.js"
 rsync -a assets/ "$OUTPUT_ROOT/assets/"
 touch "$OUTPUT_ROOT/.nojekyll"
 
@@ -35,15 +36,8 @@ if 'rel="icon"' not in html:
     head_parts.append('<link rel="icon" href="./icon.svg" type="image/svg+xml">')
 if 'premium-client.css' not in html:
     head_parts.append('<link rel="stylesheet" href="./premium-client.css">')
-if 'name="theme-color"' not in html:
-    head_parts.append('<meta name="theme-color" content="#1f5a47">')
-if 'name="apple-mobile-web-app-capable"' not in html:
-    head_parts.append('<meta name="apple-mobile-web-app-capable" content="yes">')
-if 'name="apple-mobile-web-app-status-bar-style"' not in html:
-    head_parts.append('<meta name="apple-mobile-web-app-status-bar-style" content="default">')
 if 'name="apple-mobile-web-app-title"' not in html:
     head_parts.append('<meta name="apple-mobile-web-app-title" content="Домашняя кухня">')
-
 if head_parts:
     if '</head>' not in html:
         raise SystemExit('missing </head> in public client index')
@@ -60,7 +54,6 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>""")
-
 if body_parts:
     if '</body>' not in html:
         raise SystemExit('missing </body> in public client index')
