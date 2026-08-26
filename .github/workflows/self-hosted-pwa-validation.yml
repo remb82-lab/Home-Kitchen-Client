@@ -1,0 +1,109 @@
+name: Self-hosted PWA Validation
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'factory/self-hosted-pwa-validation-*'
+    paths:
+      - '.github/workflows/self-hosted-pwa-validation.yml'
+      - 'scripts/build-central-pwa.sh'
+      - 'manifest.webmanifest'
+      - 'icon.svg'
+      - 'sw.js'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/self-hosted-pwa-validation.yml'
+      - 'scripts/build-central-pwa.sh'
+      - 'manifest.webmanifest'
+      - 'icon.svg'
+      - 'sw.js'
+
+permissions:
+  contents: read
+
+env:
+  HOME_KITCHEN_SOURCE_REPOSITORY: remb82-lab/Home-Kitchen
+  HOME_KITCHEN_SOURCE_SHA: 9d81ae12c044d1ec32a0773bb1c7fc083e28c8d2
+
+jobs:
+  pwa-validation:
+    runs-on: [self-hosted, Windows, X64, hk-windows]
+    timeout-minutes: 15
+    steps:
+      - name: Checkout deployment repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+
+      - name: Setup Node 22
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: '22'
+
+      - name: Checkout approved central client source
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        with:
+          repository: ${{ env.HOME_KITCHEN_SOURCE_REPOSITORY }}
+          ref: ${{ env.HOME_KITCHEN_SOURCE_SHA }}
+          path: _source
+
+      - name: Verify pinned source SHA
+        shell: pwsh
+        run: |
+          $actual = git -C _source rev-parse HEAD
+          if ($actual.Trim() -ne $env:HOME_KITCHEN_SOURCE_SHA) {
+            throw "Central source SHA mismatch: $actual"
+          }
+          Write-Host "Pinned central source: $actual"
+
+      - name: Validate deploy build script syntax
+        shell: bash
+        run: bash -n scripts/build-central-pwa.sh
+
+      - name: Validate PWA package inputs
+        shell: pwsh
+        run: |
+          $required = @(
+            '_source/apps/client/web/index.html',
+            '_source/apps/client/web/premium-client.css',
+            '_source/apps/client/web/premium-client-adapter.js',
+            '_source/apps/client/web/premium-home-market.css',
+            '_source/apps/client/web/premium-home-market-adapter.js',
+            '_source/apps/client/web/assets/branding/home-kitchen-mark.svg',
+            '_source/apps/client/web/assets/icons/home-kitchen-ui.svg',
+            '_source/apps/client/web/assets/images/placeholders/product-photo-placeholder-c-v2.1.svg',
+            'manifest.webmanifest',
+            'icon.svg',
+            'sw.js'
+          )
+          foreach ($path in $required) {
+            if (-not (Test-Path $path -PathType Leaf)) { throw "Missing required PWA input: $path" }
+            if ((Get-Item $path).Length -le 0) { throw "Empty required PWA input: $path" }
+          }
+
+          $adapter = Get-Content '_source/apps/client/web/premium-client-adapter.js' -Raw
+          $css = Get-Content '_source/apps/client/web/premium-client.css' -Raw
+          $manifest = Get-Content 'manifest.webmanifest' -Raw
+          $sw = Get-Content 'sw.js' -Raw
+          $icons = Get-Content '_source/apps/client/web/assets/icons/home-kitchen-ui.svg' -Raw
+
+          if ($adapter -notmatch 'home-kitchen-ui\.svg') { throw 'Unified SVG sprite is not wired in adapter' }
+          if ($adapter -notmatch 'home-kitchen-mark\.svg') { throw 'Brand mark is not wired in adapter' }
+          if ($css -notmatch 'phm-client') { throw 'Premium client CSS marker is missing' }
+          if ($manifest -notmatch '"display"\s*:\s*"standalone"') { throw 'PWA standalone display is missing' }
+          if ($sw -notmatch 'premium-client\.css') { throw 'Service worker does not precache premium client CSS' }
+          if ($sw -notmatch 'home-kitchen-ui\.svg') { throw 'Service worker does not precache unified SVG sprite' }
+          if ($icons -notmatch '<symbol id="cart"') { throw 'Unified SVG sprite is incomplete' }
+
+          Write-Host 'PWA package inputs: PASS'
+
+      - name: Validate production Pages workflow linkage
+        shell: pwsh
+        run: |
+          $pages = Get-Content '.github/workflows/pages.yml' -Raw
+          $smoke = Get-Content '.github/workflows/smoke.yml' -Raw
+          if ($pages -notmatch 'scripts/build-central-pwa\.sh') { throw 'Pages workflow does not use shared PWA build script' }
+          if ($smoke -notmatch 'scripts/build-central-pwa\.sh') { throw 'Smoke workflow does not use shared PWA build script' }
+          if ($pages -notmatch [regex]::Escape($env:HOME_KITCHEN_SOURCE_SHA)) { throw 'Pages workflow pinned SHA differs from self-hosted validation' }
+          if ($smoke -notmatch [regex]::Escape($env:HOME_KITCHEN_SOURCE_SHA)) { throw 'Smoke workflow pinned SHA differs from self-hosted validation' }
+          Write-Host 'Pages/smoke linkage: PASS'
