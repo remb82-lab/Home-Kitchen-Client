@@ -30,6 +30,13 @@ jobs:
           ref: ${{ env.HOME_KITCHEN_SOURCE_SHA }}
           path: _source
 
+      - name: Verify pinned source provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          ACTUAL_SOURCE_SHA="$(git -C _source rev-parse HEAD)"
+          test "$ACTUAL_SOURCE_SHA" = "$HOME_KITCHEN_SOURCE_SHA"
+
       - name: Verify approved client package
         shell: bash
         working-directory: _source/apps/client/web
