@@ -20,14 +20,14 @@ const placeholder = await fs.readFile('assets/images/placeholders/product-photo-
 const manifest = JSON.parse(await fs.readFile('manifest.webmanifest', 'utf8'));
 const sw = await fs.readFile('sw-public.js', 'utf8');
 const pages = await fs.readFile('.github/workflows/pages.yml', 'utf8');
-const builder = await fs.readFile('scripts/build-public-pwa-v2.sh', 'utf8');
+const builder = await fs.readFile('scripts/build-public-pwa.sh', 'utf8');
 
 for (const [name, content, token] of [
   ['premium-client.css', css, 'Premium Home Market'],
   ['premium-client-adapter.js', adapter, 'PRODUCT_PLACEHOLDER'],
   ['placeholder svg', placeholder, 'Фото скоро'],
   ['service worker', sw, 'home-kitchen-client-public-20260826-v2'],
-  ['Pages workflow', pages, 'build-public-pwa-v2.sh'],
+  ['Pages workflow', pages, 'build-public-pwa.sh'],
   ['public PWA builder', builder, 'premium-client-adapter.js']
 ]) {
   if (!content.includes(token)) throw new Error(`${name} missing required token: ${token}`);
