@@ -6,6 +6,10 @@ on:
     paths:
       - '.github/workflows/pages.yml'
       - '.github/workflows/smoke.yml'
+      - 'scripts/build-central-pwa.sh'
+      - 'manifest.webmanifest'
+      - 'icon.svg'
+      - 'sw.js'
   workflow_dispatch:
 
 permissions:
@@ -34,28 +38,39 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ACTUAL_SOURCE_SHA="$(git -C _source rev-parse HEAD)"
-          test "$ACTUAL_SOURCE_SHA" = "$HOME_KITCHEN_SOURCE_SHA"
+          test "$(git -C _source rev-parse HEAD)" = "$HOME_KITCHEN_SOURCE_SHA"
 
-      - name: Verify approved client package
+      - name: Build candidate exactly like Pages
         shell: bash
-        working-directory: _source/apps/client/web
+        run: |
+          chmod +x scripts/build-central-pwa.sh
+          scripts/build-central-pwa.sh
+
+      - name: Verify built client package
+        shell: bash
         run: |
           set -euo pipefail
-          test -s index.html
-          test -s premium-client.css
-          test -s premium-client-adapter.js
-          test -s assets/images/placeholders/product-photo-placeholder-c-v2.1.svg
-          test -s assets/branding/home-kitchen-mark.svg
-          test -s assets/icons/home-kitchen-ui.svg
-          grep -q './premium-client.css' index.html
-          grep -q './premium-client-adapter.js' index.html
-          grep -q 'home-kitchen-ui.svg' premium-client-adapter.js
-          grep -q 'data-phm-placeholder-active' premium-client.css
+          test -s _site/index.html
+          test -s _site/premium-client.css
+          test -s _site/premium-client-adapter.js
+          test -s _site/premium-home-market.css
+          test -s _site/premium-home-market-adapter.js
+          test -s _site/manifest.webmanifest
+          test -s _site/icon.svg
+          test -s _site/sw.js
+          test -s _site/assets/images/placeholders/product-photo-placeholder-c-v2.1.svg
+          test -s _site/assets/branding/home-kitchen-mark.svg
+          test -s _site/assets/icons/home-kitchen-ui.svg
+          grep -q 'rel="manifest"' _site/index.html
+          grep -q 'data-hk-pwa-registration' _site/index.html
+          grep -q 'home-kitchen-ui.svg' _site/premium-client-adapter.js
+          grep -q '"display": "standalone"' _site/manifest.webmanifest
+          grep -q 'premium-client.css' _site/sw.js
+          grep -q 'premium-home-market.css' _site/sw.js
 
       - name: Start static preview
         shell: bash
-        working-directory: _source/apps/client/web
+        working-directory: _site
         run: |
           set -euo pipefail
           python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/home-kitchen-client-smoke.log 2>&1 &
@@ -74,7 +89,11 @@ jobs:
         run: |
           set -euo pipefail
           curl -fsS http://127.0.0.1:4173/index.html -o /tmp/home-kitchen-index.html
-          test -s /tmp/home-kitchen-index.html
+          grep -q 'rel="manifest"' /tmp/home-kitchen-index.html
+          curl -fsS http://127.0.0.1:4173/manifest.webmanifest -o /tmp/manifest.webmanifest
+          grep -q '"display": "standalone"' /tmp/manifest.webmanifest
+          curl -fsS http://127.0.0.1:4173/sw.js -o /tmp/sw.js
+          grep -q 'home-kitchen-client-central-20260826-v1' /tmp/sw.js
           curl -fsS http://127.0.0.1:4173/premium-client.css -o /tmp/premium-client.css
           grep -q 'phm-client' /tmp/premium-client.css
           curl -fsS http://127.0.0.1:4173/premium-client-adapter.js -o /tmp/premium-client-adapter.js
