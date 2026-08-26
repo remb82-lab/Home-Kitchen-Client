@@ -35,24 +35,17 @@ jobs:
           ref: ${{ env.HOME_KITCHEN_SOURCE_SHA }}
           path: _source
 
-      - name: Build Pages site from approved central source
+      - name: Verify pinned source provenance
         shell: bash
         run: |
           set -euo pipefail
-          test -d _source/apps/client/web
-          rm -rf _site
-          mkdir -p _site
-          rsync -a _source/apps/client/web/ _site/
-          touch _site/.nojekyll
-          test -s _site/index.html
-          test -s _site/premium-client.css
-          test -s _site/premium-client-adapter.js
-          test -s _site/assets/images/placeholders/product-photo-placeholder-c-v2.1.svg
-          test -s _site/assets/branding/home-kitchen-mark.svg
-          test -s _site/assets/icons/home-kitchen-ui.svg
-          grep -q './premium-client.css' _site/index.html
-          grep -q './premium-client-adapter.js' _site/index.html
-          grep -q 'home-kitchen-ui.svg' _site/premium-client-adapter.js
+          test "$(git -C _source rev-parse HEAD)" = "$HOME_KITCHEN_SOURCE_SHA"
+
+      - name: Build approved PWA site
+        shell: bash
+        run: |
+          chmod +x scripts/build-central-pwa.sh
+          scripts/build-central-pwa.sh
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
