@@ -9,7 +9,7 @@ on:
     paths:
       - '.github/workflows/pages.yml'
       - '.github/workflows/smoke.yml'
-      - 'scripts/build-public-pwa-v2.sh'
+      - 'scripts/build-public-pwa.sh'
       - 'smoke.mjs'
       - 'manifest.webmanifest'
       - 'icon.svg'
@@ -41,8 +41,8 @@ jobs:
       - name: Build candidate exactly like Pages
         shell: bash
         run: |
-          chmod +x scripts/build-public-pwa-v2.sh
-          scripts/build-public-pwa-v2.sh
+          chmod +x scripts/build-public-pwa.sh
+          scripts/build-public-pwa.sh
 
       - name: Verify built client package
         shell: bash
