@@ -14,10 +14,6 @@ concurrency:
   group: pages
   cancel-in-progress: true
 
-env:
-  HOME_KITCHEN_SOURCE_REPOSITORY: remb82-lab/Home-Kitchen
-  HOME_KITCHEN_SOURCE_SHA: 9d81ae12c044d1ec32a0773bb1c7fc083e28c8d2
-
 jobs:
   deploy:
     environment:
@@ -28,24 +24,11 @@ jobs:
       - name: Checkout deployment repository
         uses: actions/checkout@v4
 
-      - name: Checkout approved central client source
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ env.HOME_KITCHEN_SOURCE_REPOSITORY }}
-          ref: ${{ env.HOME_KITCHEN_SOURCE_SHA }}
-          path: _source
-
-      - name: Verify pinned source provenance
+      - name: Build self-contained PWA site
         shell: bash
         run: |
-          set -euo pipefail
-          test "$(git -C _source rev-parse HEAD)" = "$HOME_KITCHEN_SOURCE_SHA"
-
-      - name: Build approved PWA site
-        shell: bash
-        run: |
-          chmod +x scripts/build-central-pwa.sh
-          scripts/build-central-pwa.sh
+          chmod +x scripts/build-public-pwa-v2.sh
+          scripts/build-public-pwa-v2.sh
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
