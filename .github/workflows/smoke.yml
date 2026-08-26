@@ -4,28 +4,109 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'index.html'
-      - 'premium-client.css'
-      - 'premium-client-adapter.js'
-      - 'assets/**'
-      - 'smoke.mjs'
       - '.github/workflows/pages.yml'
       - '.github/workflows/smoke.yml'
+      - 'scripts/build-central-pwa.sh'
+      - 'manifest.webmanifest'
+      - 'icon.svg'
+      - 'sw.js'
   workflow_dispatch:
 
 permissions:
   contents: read
+
+env:
+  HOME_KITCHEN_SOURCE_REPOSITORY: remb82-lab/Home-Kitchen
+  HOME_KITCHEN_SOURCE_SHA: 9d81ae12c044d1ec32a0773bb1c7fc083e28c8d2
 
 jobs:
   smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Checkout
+      - name: Checkout deployment repository
         uses: actions/checkout@v4
-      - name: Use Node.js
-        uses: actions/setup-node@v4
+
+      - name: Checkout approved central client source
+        uses: actions/checkout@v4
         with:
-          node-version: '22'
-      - name: Run client smoke
-        run: node smoke.mjs
+          repository: ${{ env.HOME_KITCHEN_SOURCE_REPOSITORY }}
+          ref: ${{ env.HOME_KITCHEN_SOURCE_SHA }}
+          path: _source
+
+      - name: Verify pinned source provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C _source rev-parse HEAD)" = "$HOME_KITCHEN_SOURCE_SHA"
+
+      - name: Build candidate exactly like Pages
+        shell: bash
+        run: |
+          chmod +x scripts/build-central-pwa.sh
+          scripts/build-central-pwa.sh
+
+      - name: Verify built client package
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s _site/index.html
+          test -s _site/premium-client.css
+          test -s _site/premium-client-adapter.js
+          test -s _site/premium-home-market.css
+          test -s _site/premium-home-market-adapter.js
+          test -s _site/manifest.webmanifest
+          test -s _site/icon.svg
+          test -s _site/sw.js
+          test -s _site/assets/images/placeholders/product-photo-placeholder-c-v2.1.svg
+          test -s _site/assets/branding/home-kitchen-mark.svg
+          test -s _site/assets/icons/home-kitchen-ui.svg
+          grep -q 'rel="manifest"' _site/index.html
+          grep -q 'data-hk-pwa-registration' _site/index.html
+          grep -q 'home-kitchen-ui.svg' _site/premium-client-adapter.js
+          grep -q '"display": "standalone"' _site/manifest.webmanifest
+          grep -q 'premium-client.css' _site/sw.js
+          grep -q 'premium-home-market.css' _site/sw.js
+
+      - name: Start static preview
+        shell: bash
+        working-directory: _site
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/home-kitchen-client-smoke.log 2>&1 &
+          echo $! >/tmp/home-kitchen-client-smoke.pid
+          for i in {1..20}; do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then
+              exit 0
+            fi
+            sleep 0.5
+          done
+          cat /tmp/home-kitchen-client-smoke.log
+          exit 1
+
+      - name: HTTP smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS http://127.0.0.1:4173/index.html -o /tmp/home-kitchen-index.html
+          grep -q 'rel="manifest"' /tmp/home-kitchen-index.html
+          curl -fsS http://127.0.0.1:4173/manifest.webmanifest -o /tmp/manifest.webmanifest
+          grep -q '"display": "standalone"' /tmp/manifest.webmanifest
+          curl -fsS http://127.0.0.1:4173/sw.js -o /tmp/sw.js
+          grep -q 'home-kitchen-client-central-20260826-v1' /tmp/sw.js
+          curl -fsS http://127.0.0.1:4173/premium-client.css -o /tmp/premium-client.css
+          grep -q 'phm-client' /tmp/premium-client.css
+          curl -fsS http://127.0.0.1:4173/premium-client-adapter.js -o /tmp/premium-client-adapter.js
+          grep -q 'PRODUCT_PLACEHOLDER' /tmp/premium-client-adapter.js
+          curl -fsS http://127.0.0.1:4173/assets/branding/home-kitchen-mark.svg -o /tmp/home-kitchen-mark.svg
+          grep -q '<svg' /tmp/home-kitchen-mark.svg
+          curl -fsS http://127.0.0.1:4173/assets/icons/home-kitchen-ui.svg -o /tmp/home-kitchen-ui.svg
+          grep -q '<symbol id="cart"' /tmp/home-kitchen-ui.svg
+
+      - name: Stop static preview
+        if: always()
+        shell: bash
+        run: |
+          if [ -f /tmp/home-kitchen-client-smoke.pid ]; then
+            kill "$(cat /tmp/home-kitchen-client-smoke.pid)" || true
+          fi
