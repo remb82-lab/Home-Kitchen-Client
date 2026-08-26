@@ -4,11 +4,6 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'index.html'
-      - 'premium-client.css'
-      - 'premium-client-adapter.js'
-      - 'assets/**'
-      - 'smoke.mjs'
       - '.github/workflows/pages.yml'
       - '.github/workflows/smoke.yml'
   workflow_dispatch:
@@ -16,16 +11,76 @@ on:
 permissions:
   contents: read
 
+env:
+  HOME_KITCHEN_SOURCE_REPOSITORY: remb82-lab/Home-Kitchen
+  HOME_KITCHEN_SOURCE_SHA: 9d81ae12c044d1ec32a0773bb1c7fc083e28c8d2
+
 jobs:
   smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Checkout
+      - name: Checkout deployment repository
         uses: actions/checkout@v4
-      - name: Use Node.js
-        uses: actions/setup-node@v4
+
+      - name: Checkout approved central client source
+        uses: actions/checkout@v4
         with:
-          node-version: '22'
-      - name: Run client smoke
-        run: node smoke.mjs
+          repository: ${{ env.HOME_KITCHEN_SOURCE_REPOSITORY }}
+          ref: ${{ env.HOME_KITCHEN_SOURCE_SHA }}
+          path: _source
+
+      - name: Verify approved client package
+        shell: bash
+        working-directory: _source/apps/client/web
+        run: |
+          set -euo pipefail
+          test -s index.html
+          test -s premium-client.css
+          test -s premium-client-adapter.js
+          test -s assets/images/placeholders/product-photo-placeholder-c-v2.1.svg
+          test -s assets/branding/home-kitchen-mark.svg
+          test -s assets/icons/home-kitchen-ui.svg
+          grep -q './premium-client.css' index.html
+          grep -q './premium-client-adapter.js' index.html
+          grep -q 'home-kitchen-ui.svg' premium-client-adapter.js
+          grep -q 'data-phm-placeholder-active' premium-client.css
+
+      - name: Start static preview
+        shell: bash
+        working-directory: _source/apps/client/web
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/home-kitchen-client-smoke.log 2>&1 &
+          echo $! >/tmp/home-kitchen-client-smoke.pid
+          for i in {1..20}; do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then
+              exit 0
+            fi
+            sleep 0.5
+          done
+          cat /tmp/home-kitchen-client-smoke.log
+          exit 1
+
+      - name: HTTP smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS http://127.0.0.1:4173/index.html -o /tmp/home-kitchen-index.html
+          test -s /tmp/home-kitchen-index.html
+          curl -fsS http://127.0.0.1:4173/premium-client.css -o /tmp/premium-client.css
+          grep -q 'phm-client' /tmp/premium-client.css
+          curl -fsS http://127.0.0.1:4173/premium-client-adapter.js -o /tmp/premium-client-adapter.js
+          grep -q 'PRODUCT_PLACEHOLDER' /tmp/premium-client-adapter.js
+          curl -fsS http://127.0.0.1:4173/assets/branding/home-kitchen-mark.svg -o /tmp/home-kitchen-mark.svg
+          grep -q '<svg' /tmp/home-kitchen-mark.svg
+          curl -fsS http://127.0.0.1:4173/assets/icons/home-kitchen-ui.svg -o /tmp/home-kitchen-ui.svg
+          grep -q '<symbol id="cart"' /tmp/home-kitchen-ui.svg
+
+      - name: Stop static preview
+        if: always()
+        shell: bash
+        run: |
+          if [ -f /tmp/home-kitchen-client-smoke.pid ]; then
+            kill "$(cat /tmp/home-kitchen-client-smoke.pid)" || true
+          fi
