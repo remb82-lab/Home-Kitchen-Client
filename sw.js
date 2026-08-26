@@ -6,6 +6,8 @@ const APP_SHELL=[
   './icon.svg',
   './premium-client.css',
   './premium-client-adapter.js',
+  './premium-home-market.css',
+  './premium-home-market-adapter.js',
   './assets/branding/home-kitchen-mark.svg',
   './assets/icons/home-kitchen-ui.svg',
   './assets/images/placeholders/product-photo-placeholder-c-v2.1.svg'
