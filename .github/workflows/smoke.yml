@@ -1,23 +1,26 @@
 name: Client Smoke Gate
 
 on:
+  push:
+    branches:
+      - 'factory/pages-self-contained-twa-*'
   pull_request:
     branches: [main]
     paths:
       - '.github/workflows/pages.yml'
       - '.github/workflows/smoke.yml'
-      - 'scripts/build-central-pwa.sh'
+      - 'scripts/build-public-pwa.sh'
+      - 'smoke.mjs'
       - 'manifest.webmanifest'
       - 'icon.svg'
-      - 'sw.js'
+      - 'sw-public.js'
+      - 'premium-client.css'
+      - 'premium-client-adapter.js'
+      - 'assets/**'
   workflow_dispatch:
 
 permissions:
   contents: read
-
-env:
-  HOME_KITCHEN_SOURCE_REPOSITORY: remb82-lab/Home-Kitchen
-  HOME_KITCHEN_SOURCE_SHA: 9d81ae12c044d1ec32a0773bb1c7fc083e28c8d2
 
 jobs:
   smoke:
@@ -27,24 +30,19 @@ jobs:
       - name: Checkout deployment repository
         uses: actions/checkout@v4
 
-      - name: Checkout approved central client source
-        uses: actions/checkout@v4
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
         with:
-          repository: ${{ env.HOME_KITCHEN_SOURCE_REPOSITORY }}
-          ref: ${{ env.HOME_KITCHEN_SOURCE_SHA }}
-          path: _source
+          node-version: '22'
 
-      - name: Verify pinned source provenance
-        shell: bash
-        run: |
-          set -euo pipefail
-          test "$(git -C _source rev-parse HEAD)" = "$HOME_KITCHEN_SOURCE_SHA"
+      - name: Validate source and live catalog
+        run: node smoke.mjs
 
       - name: Build candidate exactly like Pages
         shell: bash
         run: |
-          chmod +x scripts/build-central-pwa.sh
-          scripts/build-central-pwa.sh
+          chmod +x scripts/build-public-pwa.sh
+          scripts/build-public-pwa.sh
 
       - name: Verify built client package
         shell: bash
@@ -53,20 +51,16 @@ jobs:
           test -s _site/index.html
           test -s _site/premium-client.css
           test -s _site/premium-client-adapter.js
-          test -s _site/premium-home-market.css
-          test -s _site/premium-home-market-adapter.js
           test -s _site/manifest.webmanifest
           test -s _site/icon.svg
           test -s _site/sw.js
           test -s _site/assets/images/placeholders/product-photo-placeholder-c-v2.1.svg
-          test -s _site/assets/branding/home-kitchen-mark.svg
-          test -s _site/assets/icons/home-kitchen-ui.svg
           grep -q 'rel="manifest"' _site/index.html
+          grep -q 'premium-client.css' _site/index.html
+          grep -q 'premium-client-adapter.js' _site/index.html
           grep -q 'data-hk-pwa-registration' _site/index.html
-          grep -q 'home-kitchen-ui.svg' _site/premium-client-adapter.js
           grep -q '"display": "standalone"' _site/manifest.webmanifest
-          grep -q 'premium-client.css' _site/sw.js
-          grep -q 'premium-home-market.css' _site/sw.js
+          grep -q 'home-kitchen-client-public-20260826-v2' _site/sw.js
 
       - name: Start static preview
         shell: bash
@@ -93,15 +87,11 @@ jobs:
           curl -fsS http://127.0.0.1:4173/manifest.webmanifest -o /tmp/manifest.webmanifest
           grep -q '"display": "standalone"' /tmp/manifest.webmanifest
           curl -fsS http://127.0.0.1:4173/sw.js -o /tmp/sw.js
-          grep -q 'home-kitchen-client-central-20260826-v1' /tmp/sw.js
+          grep -q 'home-kitchen-client-public-20260826-v2' /tmp/sw.js
           curl -fsS http://127.0.0.1:4173/premium-client.css -o /tmp/premium-client.css
-          grep -q 'phm-client' /tmp/premium-client.css
+          grep -q 'Premium Home Market' /tmp/premium-client.css
           curl -fsS http://127.0.0.1:4173/premium-client-adapter.js -o /tmp/premium-client-adapter.js
           grep -q 'PRODUCT_PLACEHOLDER' /tmp/premium-client-adapter.js
-          curl -fsS http://127.0.0.1:4173/assets/branding/home-kitchen-mark.svg -o /tmp/home-kitchen-mark.svg
-          grep -q '<svg' /tmp/home-kitchen-mark.svg
-          curl -fsS http://127.0.0.1:4173/assets/icons/home-kitchen-ui.svg -o /tmp/home-kitchen-ui.svg
-          grep -q '<symbol id="cart"' /tmp/home-kitchen-ui.svg
 
       - name: Stop static preview
         if: always()
