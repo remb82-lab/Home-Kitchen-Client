@@ -14,6 +14,10 @@ concurrency:
   group: pages
   cancel-in-progress: true
 
+env:
+  HOME_KITCHEN_SOURCE_REPOSITORY: remb82-lab/Home-Kitchen
+  HOME_KITCHEN_SOURCE_SHA: 9d81ae12c044d1ec32a0773bb1c7fc083e28c8d2
+
 jobs:
   deploy:
     environment:
@@ -21,33 +25,34 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout deployment repository
         uses: actions/checkout@v4
 
-      - name: Build Pages site with approved Premium UI
+      - name: Checkout approved central client source
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.HOME_KITCHEN_SOURCE_REPOSITORY }}
+          ref: ${{ env.HOME_KITCHEN_SOURCE_SHA }}
+          path: _source
+
+      - name: Build Pages site from approved central source
         shell: bash
         run: |
           set -euo pipefail
+          test -d _source/apps/client/web
+          rm -rf _site
           mkdir -p _site
-          rsync -a --exclude '.git' --exclude '_site' ./ _site/
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path('_site/index.html')
-          html = p.read_text(encoding='utf-8')
-          css = '<link rel="stylesheet" href="premium-client.css?v=20260818">'
-          js = '<script src="premium-client-adapter.js?v=20260818" defer></script>'
-          if css not in html:
-              html = html.replace('</head>', css + '\n</head>', 1)
-          if js not in html:
-              html = html.replace('</body>', js + '\n</body>', 1)
-          p.write_text(html, encoding='utf-8')
-          PY
+          rsync -a _source/apps/client/web/ _site/
+          touch _site/.nojekyll
           test -s _site/index.html
           test -s _site/premium-client.css
           test -s _site/premium-client-adapter.js
           test -s _site/assets/images/placeholders/product-photo-placeholder-c-v2.1.svg
-          grep -q 'premium-client.css' _site/index.html
-          grep -q 'premium-client-adapter.js' _site/index.html
+          test -s _site/assets/branding/home-kitchen-mark.svg
+          test -s _site/assets/icons/home-kitchen-ui.svg
+          grep -q './premium-client.css' _site/index.html
+          grep -q './premium-client-adapter.js' _site/index.html
+          grep -q 'home-kitchen-ui.svg' _site/premium-client-adapter.js
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
