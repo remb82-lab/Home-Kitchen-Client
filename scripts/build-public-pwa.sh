@@ -11,7 +11,10 @@ for path in \
   manifest.webmanifest \
   icon.svg \
   sw-public.js \
-  assets/images/placeholders/product-photo-placeholder-c-v2.1.svg; do
+  assets/images/placeholders/product-photo-placeholder-c-v2.1.svg \
+  assets/products/syrniki-classic-premium.webp \
+  assets/products/syrniki-raisins-vanilla.webp \
+  assets/images/products/syrniki-poppy.webp; do
   test -s "$path"
 done
 
@@ -19,7 +22,7 @@ rm -rf "$OUTPUT_ROOT"
 mkdir -p "$OUTPUT_ROOT"
 cp index.html premium-client.css premium-client-adapter.js kg-only.js manifest.webmanifest icon.svg "$OUTPUT_ROOT/"
 cp sw-public.js "$OUTPUT_ROOT/sw.js"
-rsync -a assets/ "$OUTPUT_ROOT/assets/"
+rsync -a --exclude='images/products/*.png' assets/ "$OUTPUT_ROOT/assets/"
 touch "$OUTPUT_ROOT/.nojekyll"
 
 OUTPUT_ROOT="$OUTPUT_ROOT" python3 - <<'PY'
@@ -73,6 +76,10 @@ test -s "$OUTPUT_ROOT/premium-client.css"
 test -s "$OUTPUT_ROOT/premium-client-adapter.js"
 test -s "$OUTPUT_ROOT/kg-only.js"
 test -s "$OUTPUT_ROOT/assets/images/placeholders/product-photo-placeholder-c-v2.1.svg"
+test -s "$OUTPUT_ROOT/assets/products/syrniki-classic-premium.webp"
+test -s "$OUTPUT_ROOT/assets/products/syrniki-raisins-vanilla.webp"
+test -s "$OUTPUT_ROOT/assets/images/products/syrniki-poppy.webp"
+test ! -e "$OUTPUT_ROOT/assets/images/products/syrniki-poppy.png"
 grep -q 'client-kitchen' "$OUTPUT_ROOT/index.html"
 grep -q 'rel="manifest"' "$OUTPUT_ROOT/index.html"
 grep -q 'premium-client.css' "$OUTPUT_ROOT/index.html"
@@ -80,5 +87,5 @@ grep -q 'premium-client-adapter.js' "$OUTPUT_ROOT/index.html"
 grep -q 'kg-only.js' "$OUTPUT_ROOT/index.html"
 grep -q 'data-hk-pwa-registration' "$OUTPUT_ROOT/index.html"
 grep -q '"display": "standalone"' "$OUTPUT_ROOT/manifest.webmanifest"
-grep -q 'home-kitchen-client-public-20260828-v4' "$OUTPUT_ROOT/sw.js"
+grep -q 'home-kitchen-client-public-20260828-v5' "$OUTPUT_ROOT/sw.js"
 grep -q 'hk-kg-only-v1' "$OUTPUT_ROOT/kg-only.js"

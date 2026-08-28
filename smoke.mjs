@@ -30,7 +30,7 @@ for (const [name, content, token] of [
   ['kg-only.js 1kg cart', kgOnly, 'grams:1000'],
   ['kg-only.js 1kg label', kgOnly, '1 кг'],
   ['placeholder svg', placeholder, 'Фото скоро'],
-  ['service worker', sw, 'home-kitchen-client-public-20260828-v4'],
+  ['service worker', sw, 'home-kitchen-client-public-20260828-v5'],
   ['service worker kg module', sw, './kg-only.js'],
   ['Pages workflow', pages, 'build-public-pwa.sh'],
   ['public PWA builder', builder, 'kg-only.js']
@@ -50,15 +50,24 @@ const productPhotos = JSON.parse(photoMatch[1]);
 const photoEntries = Object.entries(productPhotos);
 if (photoEntries.length !== 49) throw new Error(`Expected 49 product photo mappings, got ${photoEntries.length}`);
 if (new Set(photoEntries.map(([, path]) => path)).size !== photoEntries.length) throw new Error('Duplicate product photo mapping detected');
-if (productPhotos['1'] !== 'assets/images/products/syrniki-classic-premium.png') throw new Error('Approved classic syrniki mapping changed');
-if (productPhotos['2'] !== 'assets/images/products/syrniki-raisins-vanilla.png') throw new Error('Approved raisins syrniki mapping changed');
+if (productPhotos['1'] !== 'assets/products/syrniki-classic-premium.webp') throw new Error('Approved classic syrniki mapping changed');
+if (productPhotos['2'] !== 'assets/products/syrniki-raisins-vanilla.webp') throw new Error('Approved raisins syrniki mapping changed');
 if (!html.includes('new URL(relative,document.baseURI)')) throw new Error('Product asset paths must resolve against document.baseURI');
 if (html.includes("p.image_url||p.photo_url||p.image")) throw new Error('Catalog must not render external product image URLs');
 for (const [, relative] of photoEntries) {
   await fs.access(relative);
 }
-const productFiles = (await fs.readdir('assets/images/products')).filter((name) => name.endsWith('.png'));
-if (productFiles.length !== 49) throw new Error(`Expected 49 local product PNG files, got ${productFiles.length}`);
+const sourcePngs = (await fs.readdir('assets/images/products')).filter((name) => name.endsWith('.png'));
+if (sourcePngs.length !== 49) throw new Error(`Expected 49 source product PNG files, got ${sourcePngs.length}`);
+const optimizedWebps = (await fs.readdir('assets/images/products')).filter((name) => name.endsWith('.webp'));
+if (optimizedWebps.length !== 47) throw new Error(`Expected 47 optimized product WebP files, got ${optimizedWebps.length}`);
+const optimizedStats = await Promise.all(optimizedWebps.map((name) => fs.stat('assets/images/products/' + name)));
+const optimizedBytes = optimizedStats.reduce((sum, stat) => sum + stat.size, 0);
+if (optimizedBytes >= 10_000_000) throw new Error(`Optimized product WebP payload too large: ${optimizedBytes}`);
+if (photoEntries.some(([, path]) => !path.endsWith('.webp'))) throw new Error('Catalog mappings must use WebP delivery assets');
+if (!html.includes('loading="${loading}"') || !html.includes('fetchpriority="${fetchPriority}"') || !html.includes('decoding="async"')) {
+  throw new Error('Product images must use priority/lazy loading and async decoding');
+}
 if (!adapter.includes('phmImageError') || !adapter.includes('product image failed to load')) {
   throw new Error('Product image fallback must preserve explicit load-error diagnostics');
 }
