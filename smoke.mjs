@@ -30,7 +30,7 @@ for (const [name, content, token] of [
   ['kg-only.js 1kg cart', kgOnly, 'grams:1000'],
   ['kg-only.js 1kg label', kgOnly, '1 кг'],
   ['placeholder svg', placeholder, 'Фото скоро'],
-  ['service worker', sw, 'home-kitchen-client-public-20260826-v3'],
+  ['service worker', sw, 'home-kitchen-client-public-20260828-v4'],
   ['service worker kg module', sw, './kg-only.js'],
   ['Pages workflow', pages, 'build-public-pwa.sh'],
   ['public PWA builder', builder, 'kg-only.js']
