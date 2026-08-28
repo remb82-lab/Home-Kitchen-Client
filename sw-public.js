@@ -1,4 +1,4 @@
-const CACHE='home-kitchen-client-public-20260826-v3';
+const CACHE='home-kitchen-client-public-20260828-v4';
 const APP_SHELL=[
   './',
   './index.html',
@@ -45,17 +45,15 @@ self.addEventListener('fetch',event=>{
 
   if(url.origin===self.location.origin){
     event.respondWith((async()=>{
-      const cached=await caches.match(req);
-      if(cached) return cached;
+      const cache=await caches.open(CACHE);
       try{
         const fresh=await fetch(req);
-        if(fresh.ok){
-          const cache=await caches.open(CACHE);
-          await cache.put(req,fresh.clone());
-        }
+        if(fresh&&fresh.ok) cache.put(req,fresh.clone()).catch(()=>{});
         return fresh;
       }catch{
-        if(req.mode==='navigate') return (await caches.match('./index.html')) || Response.error();
+        const cached=await cache.match(req);
+        if(cached) return cached;
+        if(req.mode==='navigate') return (await cache.match('./index.html')) || Response.error();
         throw new Error('offline');
       }
     })());
