@@ -58,16 +58,18 @@ jobs:
           test -s _site/icon.svg
           test -s _site/sw.js
           test -s _site/assets/images/placeholders/product-photo-placeholder-c-v2.1.svg
-          test -s _site/assets/images/products/syrniki-classic-premium.png
-          test -s _site/assets/images/products/syrniki-poppy.png
-          test -s _site/assets/images/products/cutlets-chicken-creamy.png
+          test -s _site/assets/products/syrniki-classic-premium.webp
+          test -s _site/assets/products/syrniki-raisins-vanilla.webp
+          test -s _site/assets/images/products/syrniki-poppy.webp
+          test -s _site/assets/images/products/cutlets-chicken-creamy.webp
+          test ! -e _site/assets/images/products/syrniki-poppy.png
           grep -q 'rel="manifest"' _site/index.html
           grep -q 'premium-client.css' _site/index.html
           grep -q 'premium-client-adapter.js' _site/index.html
           grep -q 'kg-only.js' _site/index.html
           grep -q 'data-hk-pwa-registration' _site/index.html
           grep -q '"display": "standalone"' _site/manifest.webmanifest
-          grep -q 'home-kitchen-client-public-20260828-v4' _site/sw.js
+          grep -q 'home-kitchen-client-public-20260828-v5' _site/sw.js
           grep -q 'hk-kg-only-v1' _site/kg-only.js
 
       - name: Start static preview
@@ -96,17 +98,19 @@ jobs:
           curl -fsS http://127.0.0.1:4173/manifest.webmanifest -o /tmp/manifest.webmanifest
           grep -q '"display": "standalone"' /tmp/manifest.webmanifest
           curl -fsS http://127.0.0.1:4173/sw.js -o /tmp/sw.js
-          grep -q 'home-kitchen-client-public-20260828-v4' /tmp/sw.js
+          grep -q 'home-kitchen-client-public-20260828-v5' /tmp/sw.js
           curl -fsS http://127.0.0.1:4173/premium-client.css -o /tmp/premium-client.css
           grep -q 'Premium Home Market' /tmp/premium-client.css
           curl -fsS http://127.0.0.1:4173/premium-client-adapter.js -o /tmp/premium-client-adapter.js
           grep -q 'PRODUCT_PLACEHOLDER' /tmp/premium-client-adapter.js
-          curl -fsS http://127.0.0.1:4173/assets/images/products/syrniki-classic-premium.png -o /tmp/product-1.png
-          test -s /tmp/product-1.png
-          curl -fsS http://127.0.0.1:4173/assets/images/products/syrniki-poppy.png -o /tmp/product-3.png
-          test -s /tmp/product-3.png
-          curl -fsS http://127.0.0.1:4173/assets/images/products/cutlets-chicken-creamy.png -o /tmp/product-20.png
-          test -s /tmp/product-20.png
+          curl -fsS http://127.0.0.1:4173/assets/products/syrniki-classic-premium.webp -o /tmp/product-1.webp
+          test -s /tmp/product-1.webp
+          curl -fsS http://127.0.0.1:4173/assets/products/syrniki-raisins-vanilla.webp -o /tmp/product-2.webp
+          test -s /tmp/product-2.webp
+          curl -fsS http://127.0.0.1:4173/assets/images/products/syrniki-poppy.webp -o /tmp/product-3.webp
+          test -s /tmp/product-3.webp
+          curl -fsS http://127.0.0.1:4173/assets/images/products/cutlets-chicken-creamy.webp -o /tmp/product-20.webp
+          test -s /tmp/product-20.webp
           curl -fsS http://127.0.0.1:4173/kg-only.js -o /tmp/kg-only.js
           grep -q 'hk-kg-only-v1' /tmp/kg-only.js
           grep -q 'grams:1000' /tmp/kg-only.js
