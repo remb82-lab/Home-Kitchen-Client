@@ -1,0 +1,5 @@
+const CACHE='hk-client-pwa-v3';
+const CORE=['./','./manifest.webmanifest','./icon.svg'];
+self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));
+self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('hk-client-pwa-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
+self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);if(u.origin!==self.location.origin)return;e.respondWith((async()=>{const c=await caches.open(CACHE);try{const r=await fetch(e.request);if(r&&r.ok)c.put(e.request,r.clone()).catch(()=>{});return r;}catch(err){return (await c.match(e.request))||(e.request.mode==='navigate'?await c.match('./'):Promise.reject(err));}})());});
