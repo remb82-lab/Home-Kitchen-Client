@@ -1,0 +1,45 @@
+name: Temporary import approved product images
+
+on:
+  push:
+    branches:
+      - 'factory/pages-self-contained-twa-product-photos-20260828'
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - name: Download approved artifact
+        shell: bash
+        env:
+          PRODUCT_IMAGES_ARTIFACT_URL: 'https://sdmntpraustraliaeast.oaiusercontent.com/files/00000000-2260-81fa-a5fc-f03f72c981a4/raw?se=2026-08-28T07%3A23%3A06Z&sp=r&sv=2026-02-06&sr=b&scid=e4299e58-ff9c-52d9-ab44-a3d3c0fa1cc4&skoid=27fbae2c-124f-4566-a0d8-1b07a5a41c53&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-28T03%3A21%3A59Z&ske=2026-08-29T03%3A21%3A59Z&sks=b&skv=2026-02-06&sig=4xcqkHljrxHFp4R7Tg53ypM2Lmh2/Idqba25wmA8uwk%3D'
+        run: |
+          set -euo pipefail
+          curl -fL "$PRODUCT_IMAGES_ARTIFACT_URL" -o /tmp/product-images.zip
+          rm -rf /tmp/product-images
+          mkdir -p /tmp/product-images assets/images/products
+          unzip -q /tmp/product-images.zip -d /tmp/product-images
+          count="$(find /tmp/product-images -maxdepth 1 -type f -name '*.png' | wc -l | tr -d ' ')"
+          test "$count" = "49"
+          cp /tmp/product-images/*.png assets/images/products/
+          count_repo="$(find assets/images/products -maxdepth 1 -type f -name '*.png' | wc -l | tr -d ' ')"
+          test "$count_repo" = "49"
+      - name: Commit imported PNGs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/images/products/*.png
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "assets: import approved product catalog pngs"
+          git push origin HEAD:"${GITHUB_REF_NAME}"
