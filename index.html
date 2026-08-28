@@ -18,6 +18,11 @@ header{display:grid;grid-template-columns:58px 1fr auto;gap:12px;align-items:cen
 .cartitem{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px;margin-bottom:8px}.cname{font-size:12px;font-weight:850}.small{font-size:10px;color:var(--muted);margin-top:3px}.qty{display:flex;align-items:center;gap:6px}.qty button{width:30px;height:30px;border:1px solid var(--line);background:#fff;border-radius:9px}.totalbox{background:#fff;border:1px solid var(--line);border-radius:15px;padding:13px;margin-top:10px}.row{display:flex;justify-content:space-between;gap:10px;align-items:center}.grand{font-size:22px;font-weight:900;color:var(--green)}.checkout{width:100%;border:0;border-radius:14px;background:var(--green);color:#fff;padding:14px;font-weight:900;margin-top:10px}.form{background:#fff;border:1px solid var(--line);border-radius:15px;padding:13px}.form label{display:block;font-size:11px;color:var(--muted);margin-bottom:11px}.form input,.form textarea{width:100%;margin-top:5px;padding:12px;border:1px solid var(--line);border-radius:11px;background:#fff}.notice{background:#fff5e4;border:1px solid #ecd6ae;border-radius:14px;padding:11px;font-size:11px;line-height:1.45}.errorbox{background:#f9eaea;border:1px solid #e7c2c2;color:#8e3f3f}.order{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:8px}.empty{text-align:center;padding:34px 15px;color:var(--muted)}.okmark{width:80px;height:80px;border-radius:50%;background:#e9f4df;display:grid;place-items:center;font-size:42px;color:var(--green);margin:28px auto 14px}.thanks{text-align:center}.toast{position:fixed;left:50%;bottom:88px;transform:translateX(-50%);z-index:99;background:#232722;color:#fff;padding:11px 15px;border-radius:13px;font-size:12px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%;text-align:center}.toast.show{opacity:1}.toast.err{background:#a74747}.loading{text-align:center;padding:24px;color:var(--muted);font-size:12px}
 @media(min-width:620px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 </style>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon.svg">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Home Kitchen">
+<link rel="stylesheet" href="./app-shell.css">
 </head>
 <body>
 <div class="app">
@@ -66,5 +71,6 @@ function saveProfile(){profile={name:E.pname.value.trim(),phone:E.pphone.value.t
 async function loadProducts(){E.status.innerHTML='<span class="dot"></span>Загружаю актуальный прайс…';try{const d=await api('catalog');PRODUCTS=Array.isArray(d)?d:(d.items||[]);PRODUCTS=PRODUCTS.map(p=>({...p,price_half:Number(p.price_half)||0,price_kg:Number(p.price_kg)||0}));E.status.innerHTML='<span class="dot ok"></span>Актуальный прайс';if(activeCat!=='Все'&&!PRODUCTS.some(x=>x.category===activeCat))activeCat='Все';renderFilters();renderCatalog();saveCart()}catch(e){console.error(e);E.status.innerHTML='<span class="dot bad"></span>Нет связи с каталогом';E.grid.innerHTML='<div class="notice errorbox" style="grid-column:1/-1">Не удалось загрузить прайс. Проверьте интернет и нажмите «Обновить».</div>';toast('Не удалось загрузить каталог',true)}}
 saveCart();loadProducts();
 </script>
+<script src="./app-shell.js" defer></script>
 </body>
 </html>
