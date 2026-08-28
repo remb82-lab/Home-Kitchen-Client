@@ -44,7 +44,7 @@ if (pages.includes('HOME_KITCHEN_SOURCE_REPOSITORY') || pages.includes('remb82-l
 if (manifest.display !== 'standalone') throw new Error('PWA manifest display must be standalone');
 if (manifest.start_url !== './' || manifest.scope !== './') throw new Error('PWA start_url/scope must remain relative for project Pages');
 
-const photoMatch = html.match(/const PRODUCT_PHOTOS=(\\{[^;]+\\});/);
+const photoMatch = html.match(/const PRODUCT_PHOTOS=(\{[^;]+\});/);
 if (!photoMatch) throw new Error('PRODUCT_PHOTOS mapping is missing');
 const productPhotos = JSON.parse(photoMatch[1]);
 const photoEntries = Object.entries(productPhotos);
