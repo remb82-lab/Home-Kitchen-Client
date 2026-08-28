@@ -44,10 +44,32 @@ if (pages.includes('HOME_KITCHEN_SOURCE_REPOSITORY') || pages.includes('remb82-l
 if (manifest.display !== 'standalone') throw new Error('PWA manifest display must be standalone');
 if (manifest.start_url !== './' || manifest.scope !== './') throw new Error('PWA start_url/scope must remain relative for project Pages');
 
+const photoMatch = html.match(/const PRODUCT_PHOTOS=(\\{[^;]+\\});/);
+if (!photoMatch) throw new Error('PRODUCT_PHOTOS mapping is missing');
+const productPhotos = JSON.parse(photoMatch[1]);
+const photoEntries = Object.entries(productPhotos);
+if (photoEntries.length !== 49) throw new Error(`Expected 49 product photo mappings, got ${photoEntries.length}`);
+if (new Set(photoEntries.map(([, path]) => path)).size !== photoEntries.length) throw new Error('Duplicate product photo mapping detected');
+if (productPhotos['1'] !== 'assets/images/products/syrniki-classic-premium.png') throw new Error('Approved classic syrniki mapping changed');
+if (productPhotos['2'] !== 'assets/images/products/syrniki-raisins-vanilla.png') throw new Error('Approved raisins syrniki mapping changed');
+if (!html.includes('new URL(relative,document.baseURI)')) throw new Error('Product asset paths must resolve against document.baseURI');
+if (html.includes("p.image_url||p.photo_url||p.image")) throw new Error('Catalog must not render external product image URLs');
+for (const [, relative] of photoEntries) {
+  await fs.access(relative);
+}
+const productFiles = (await fs.readdir('assets/images/products')).filter((name) => name.endsWith('.png'));
+if (productFiles.length !== 49) throw new Error(`Expected 49 local product PNG files, got ${productFiles.length}`);
+if (!adapter.includes('phmImageError') || !adapter.includes('product image failed to load')) {
+  throw new Error('Product image fallback must preserve explicit load-error diagnostics');
+}
+
 const endpoint = 'https://zdxfxyesdlwzpdknapti.supabase.co/functions/v1/client-kitchen?mode=catalog';
 const r = await fetch(endpoint, { headers: { accept: 'application/json' } });
 if (!r.ok) throw new Error(`Catalog API failed: ${r.status}`);
 const data = await r.json();
 if (!Array.isArray(data)) throw new Error('Catalog response must be an array');
+const unmapped = data.filter((item) => !productPhotos[String(item.id)]);
+if (unmapped.length) throw new Error('Published catalog items without local photos: ' + unmapped.map((item) => item.id).join(','));
+
 if (data.some(item => !Number(item.price_kg))) throw new Error('Every published client item must expose a valid 1kg price');
 console.log(`PASS: 1kg-only self-contained client PWA and catalog API OK; ${data.length} published items.`);

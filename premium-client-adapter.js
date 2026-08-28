@@ -11,11 +11,21 @@
   };
   var labels={catalog:'Каталог',cartPage:'Корзина',orders:'Заказы',profile:'Профиль'};
 
+  function resolveLocalAsset(src){
+    try{return new URL(src,document.baseURI).href}catch(_){return src}
+  }
   function usePlaceholder(img){
-    if(!img||img.getAttribute('src')===PRODUCT_PLACEHOLDER)return;
+    if(!img)return;
+    var failedSrc=(img.getAttribute('src')||'').trim();
+    var placeholderUrl=resolveLocalAsset(PRODUCT_PLACEHOLDER);
+    if(failedSrc===PRODUCT_PLACEHOLDER||failedSrc===placeholderUrl)return;
     img.dataset.phmPlaceholderActive='true';
+    img.dataset.phmImageError=failedSrc||'missing-src';
+    if(window.console&&typeof window.console.error==='function'){
+      window.console.error('[Home Kitchen] product image failed to load',failedSrc||'(empty src)',img.getAttribute('alt')||'');
+    }
     img.removeAttribute('onerror');
-    img.setAttribute('src',PRODUCT_PLACEHOLDER);
+    img.setAttribute('src',placeholderUrl);
     if(!img.getAttribute('alt'))img.setAttribute('alt','Фото товара скоро');
   }
   function syncImages(){
