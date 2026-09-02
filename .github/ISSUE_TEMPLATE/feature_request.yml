@@ -1,0 +1,27 @@
+name: Feature request
+description: Suggest an improvement to the public Home Kitchen customer PWA.
+title: "[Feature] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This repository covers the public customer-facing client only. Private owner/admin logic is out of scope.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Customer problem
+      description: What user problem or friction should be improved?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed improvement
+      description: Describe the smallest useful client-side change.
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Expected impact
+      description: How would this improve catalog, cart, checkout, orders, PWA or accessibility?
