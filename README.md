@@ -1,8 +1,18 @@
+<div align="center">
+
 # Home Kitchen Client
 
-> **Mobile-first PWA storefront for a home food business.**
+### Mobile-first PWA storefront for a home food business.
+
+[![Live Demo](https://img.shields.io/badge/▶_Live_Demo-Open-4c6a3f?style=for-the-badge)](https://remb82-lab.github.io/Home-Kitchen-Client/)
+[![Deploy](https://github.com/remb82-lab/Home-Kitchen-Client/actions/workflows/pages.yml/badge.svg)](https://github.com/remb82-lab/Home-Kitchen-Client/actions/workflows/pages.yml)
+[![GitHub stars](https://img.shields.io/github/stars/remb82-lab/Home-Kitchen-Client?style=social)](https://github.com/remb82-lab/Home-Kitchen-Client/stargazers)
+
+</div>
 
 Home Kitchen Client is the public customer-facing application of the Home Kitchen ecosystem: a responsive catalog, product details, cart, checkout, order history and profile flow designed primarily for mobile use.
+
+**If you like the product approach, give the repository a ⭐.**
 
 [▶ Open Live Demo](https://remb82-lab.github.io/Home-Kitchen-Client/)
 
@@ -63,6 +73,12 @@ https://remb82-lab.github.io/Home-Kitchen-Client/
 ## Repository boundary
 
 This public repository intentionally contains only client-facing assets. Private owner-side source code, production administration logic and internal project infrastructure are kept outside this repository.
+
+## Support the project
+
+Support open demos and independent product development via Binance Pay.
+
+[![Support](https://img.shields.io/badge/Binance_Pay-Support-F0B90B?style=for-the-badge&logo=binance&logoColor=000000)](https://app.binance.com/uni-qr/Eq1ji9Ys)
 
 ## Author
 
