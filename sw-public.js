@@ -1,4 +1,4 @@
-const CACHE='home-kitchen-client-public-20260828-v5';
+const CACHE='home-kitchen-client-public-20260903-v6';
 const APP_SHELL=[
   './',
   './index.html',
