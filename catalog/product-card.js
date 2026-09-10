@@ -40,7 +40,7 @@
         statusBadge(product) +
         '<div class="ptitle">' + escapeHtml(product.name) + '</div>' +
         '<div class="prices prices--kg-only">' +
-          '<div class="price price--primary"><span>Цена за 1 кг</span><b>' + fmt(product.price_kg) + ' / кг</b></div>' +
+          '<div class="price price--primary"><span>Цена</span><b>' + fmt(product.price_kg) + ' / кг</b></div>' +
         '</div>' +
       '</div>' +
     '</article>';

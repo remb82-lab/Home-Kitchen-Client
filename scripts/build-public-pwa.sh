@@ -29,7 +29,8 @@ grep -q 'turnstile_token' "$OUTPUT_ROOT/checkout/checkout-controller.js"
 grep -q 'security/turnstile.js' "$OUTPUT_ROOT/index.html"
 grep -q 'v16' "$OUTPUT_ROOT/app-sw.js"
 
-grep -q 'Цена за 1 кг' "$OUTPUT_ROOT/catalog/product-card.js"
+grep -q '<span>Цена</span>' "$OUTPUT_ROOT/catalog/product-card.js"
+! grep -q 'Цена за 1 кг' "$OUTPUT_ROOT/catalog/product-card.js"
 ! grep -q 'price_half' "$OUTPUT_ROOT/catalog/product-card.js"
 ! grep -q 'price_half\|add-half' "$OUTPUT_ROOT/catalog/product-detail.js"
 grep -q 'Вес заказа' "$OUTPUT_ROOT/catalog/product-detail.js"
@@ -40,6 +41,10 @@ grep -q 'Перейти в каталог' "$OUTPUT_ROOT/orders/orders-view.js"
 grep -q 'Готовим ваш заказ' "$OUTPUT_ROOT/orders/orders-controller.js"
 ! grep -q 'pbackend\|Supabase Cloud' "$OUTPUT_ROOT/profile/profile-view.js"
 ! grep -q 'id="pbackend"\|Supabase Cloud\|Подключение к Supabase' "$OUTPUT_ROOT/index.html"
+
+grep -q 'ensureCurrentOrderStyles' "$OUTPUT_ROOT/client-repeat-order-adapter.js"
+grep -q 'hk-current-order-card__head' "$OUTPUT_ROOT/client-repeat-order-adapter.js"
+grep -q 'hk-current-order-card__actions' "$OUTPUT_ROOT/client-repeat-order-adapter.js"
 
 ! grep -R -q 'client-kitchen?mode=order' "$OUTPUT_ROOT" --exclude-dir=assets
 ! grep -R -q 'TURNSTILE_SECRET_KEY' "$OUTPUT_ROOT" --exclude='deploy-meta.json'
