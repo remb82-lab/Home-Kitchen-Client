@@ -50,7 +50,7 @@
     var productItem=findProduct(id);
     var normalizedGrams=Number(grams);
     if(!productItem||productItem.availability==='out_of_stock')return;
-    if(normalizedGrams!==1000)return;
+    if(normalizedGrams!==500&&normalizedGrams!==1000)return;
 
     var existing=cart.find(function(item){
       return Number(item.product_id)===Number(id)&&Number(item.grams)===normalizedGrams;
@@ -145,6 +145,6 @@
     open:openCartModular
   });
 
-  document.documentElement.dataset.hkCartArchitecture='modular-v2-kg-only';
+  document.documentElement.dataset.hkCartArchitecture='modular-v2-price-per-kg';
   updateCartModular();
 })(window);
