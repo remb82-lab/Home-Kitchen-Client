@@ -5,12 +5,14 @@ const html=await read('index.html');
 const api=await read('services/client-api.js');
 const turnstile=await read('security/turnstile.js');
 const checkout=await read('checkout/checkout-controller.js');
+const cart=await read('cart/cart-controller.js');
 const sw=await read('app-sw.js');
 const builder=await read('scripts/build-public-pwa.sh');
 const manifest=JSON.parse(await read('manifest.webmanifest'));
 
-const requiredHtml=['Домашняя кухня','Каталог','Корзина','Мои заказы','Профиль','security/turnstile.js','services/client-api.js'];
+const requiredHtml=['Домашняя кухня','Каталог','Мои заказы','Профиль','security/turnstile.js','services/client-api.js','cart/cart-controller.js'];
 for(const token of requiredHtml){if(!html.includes(token))throw new Error('Missing public UI/module token: '+token);}
+if(!cart.includes('global.openCart=openCartModular'))throw new Error('Modular cart controller is not wired');
 if(html.includes('client-kitchen?mode=order'))throw new Error('Legacy order endpoint must not ship');
 if(html.includes('kg-only.js'))throw new Error('Legacy 1kg override must not ship');
 if(html.includes('SUPABASE_SERVICE_ROLE_KEY')||html.includes('TURNSTILE_SECRET_KEY'))throw new Error('Server secrets must never be present in public HTML');
