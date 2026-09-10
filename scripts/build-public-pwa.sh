@@ -3,89 +3,62 @@ set -euo pipefail
 
 OUTPUT_ROOT="${OUTPUT_ROOT:-_site}"
 
-for path in \
-  index.html \
-  premium-client.css \
-  premium-client-adapter.js \
-  kg-only.js \
-  manifest.webmanifest \
-  icon.svg \
-  sw-public.js \
-  assets/images/placeholders/product-photo-placeholder-c-v2.1.svg \
-  assets/products/syrniki-classic-premium.webp \
-  assets/products/syrniki-raisins-vanilla.webp \
-  assets/images/products/syrniki-poppy.webp; do
-  test -s "$path"
-done
+required=(
+  index.html
+  premium-client.css
+  premium-client-adapter.js
+  app-shell.js
+  app-shell.css
+  app-sw.js
+  manifest.webmanifest
+  client-repeat-order-adapter.js
+  data/product-media.js
+  runtime/client-runtime.js
+  services/client-api.js
+  security/turnstile.js
+  contact/client-contact.js
+  catalog/catalog-data.js
+  catalog/product-card.js
+  catalog/product-detail.js
+  catalog/catalog-controller.js
+  catalog/product-share.js
+  cart/cart-view.js
+  cart/cart-controller.js
+  checkout/checkout-view.js
+  checkout/checkout-controller.js
+  orders/orders-view.js
+  orders/orders-controller.js
+  profile/profile-view.js
+  profile/profile-controller.js
+  app/app-state.js
+  app/navigation-controller.js
+  app/bootstrap.js
+  assets/branding/home-kitchen-mark.svg
+)
+for path in "${required[@]}"; do test -s "$path"; done
 
 rm -rf "$OUTPUT_ROOT"
 mkdir -p "$OUTPUT_ROOT"
-cp index.html premium-client.css premium-client-adapter.js kg-only.js manifest.webmanifest icon.svg "$OUTPUT_ROOT/"
-cp sw-public.js "$OUTPUT_ROOT/sw.js"
-rsync -a --exclude='images/products/*.png' assets/ "$OUTPUT_ROOT/assets/"
+cp index.html premium-client.css premium-client-adapter.js app-shell.js app-shell.css app-sw.js manifest.webmanifest client-repeat-order-adapter.js "$OUTPUT_ROOT/"
+for dir in data runtime services security contact catalog cart checkout orders profile app assets; do
+  cp -a "$dir" "$OUTPUT_ROOT/"
+done
 touch "$OUTPUT_ROOT/.nojekyll"
+printf '{"source_sha":"%s","deployed_at":"%s","release":"sto75-turnstile"}\n' "${GITHUB_SHA:-local}" "$(date -u +%FT%TZ)" > "$OUTPUT_ROOT/deploy-meta.json"
 
-OUTPUT_ROOT="$OUTPUT_ROOT" python3 - <<'PY'
-import os
-from pathlib import Path
-
-root = Path(os.environ['OUTPUT_ROOT'])
-index = root / 'index.html'
-html = index.read_text(encoding='utf-8')
-
-head_parts = []
-if 'rel="manifest"' not in html:
-    head_parts.append('<link rel="manifest" href="./manifest.webmanifest">')
-if 'rel="icon"' not in html:
-    head_parts.append('<link rel="icon" href="./icon.svg" type="image/svg+xml">')
-if 'premium-client.css' not in html:
-    head_parts.append('<link rel="stylesheet" href="./premium-client.css">')
-if 'name="apple-mobile-web-app-title"' not in html:
-    head_parts.append('<meta name="apple-mobile-web-app-title" content="Домашняя кухня">')
-if head_parts:
-    if '</head>' not in html:
-        raise SystemExit('missing </head> in public client index')
-    html = html.replace('</head>', '\n'.join(head_parts) + '\n</head>', 1)
-
-body_parts = []
-if 'premium-client-adapter.js' not in html:
-    body_parts.append('<script src="./premium-client-adapter.js" defer></script>')
-if 'kg-only.js' not in html:
-    body_parts.append('<script src="./kg-only.js" defer></script>')
-if 'data-hk-pwa-registration' not in html:
-    body_parts.append("""<script data-hk-pwa-registration>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js').catch(function () {});
-  });
-}
-</script>""")
-if body_parts:
-    if '</body>' not in html:
-        raise SystemExit('missing </body> in public client index')
-    html = html.replace('</body>', '\n'.join(body_parts) + '\n</body>', 1)
-
-index.write_text(html, encoding='utf-8')
-PY
+# Release contract: canonical Pages must use the modular order gateway and Turnstile.
+grep -q '/functions/v1/create-client-order' "$OUTPUT_ROOT/services/client-api.js"
+grep -q '0x4AAAAAAEvNfqWeNAvsAKeB' "$OUTPUT_ROOT/security/turnstile.js"
+grep -q "appearance:'interaction-only'" "$OUTPUT_ROOT/security/turnstile.js"
+grep -q "execution:'execute'" "$OUTPUT_ROOT/security/turnstile.js"
+grep -q 'turnstile_token' "$OUTPUT_ROOT/checkout/checkout-controller.js"
+grep -q 'security/turnstile.js' "$OUTPUT_ROOT/index.html"
+grep -q 'hk-client-pwa-.*v15\|CACHE_PREFIX.*hk-client-pwa-' "$OUTPUT_ROOT/app-sw.js"
+! grep -R -q 'client-kitchen?mode=order' "$OUTPUT_ROOT" --exclude-dir=assets
+! grep -R -q 'TURNSTILE_SECRET_KEY' "$OUTPUT_ROOT" --exclude='deploy-meta.json'
 
 test -s "$OUTPUT_ROOT/index.html"
-test -s "$OUTPUT_ROOT/manifest.webmanifest"
-test -s "$OUTPUT_ROOT/icon.svg"
-test -s "$OUTPUT_ROOT/sw.js"
-test -s "$OUTPUT_ROOT/premium-client.css"
-test -s "$OUTPUT_ROOT/premium-client-adapter.js"
-test -s "$OUTPUT_ROOT/kg-only.js"
-test -s "$OUTPUT_ROOT/assets/images/placeholders/product-photo-placeholder-c-v2.1.svg"
-test -s "$OUTPUT_ROOT/assets/products/syrniki-classic-premium.webp"
-test -s "$OUTPUT_ROOT/assets/products/syrniki-raisins-vanilla.webp"
-test -s "$OUTPUT_ROOT/assets/images/products/syrniki-poppy.webp"
-test ! -e "$OUTPUT_ROOT/assets/images/products/syrniki-poppy.png"
-grep -q 'client-kitchen' "$OUTPUT_ROOT/index.html"
-grep -q 'rel="manifest"' "$OUTPUT_ROOT/index.html"
-grep -q 'premium-client.css' "$OUTPUT_ROOT/index.html"
-grep -q 'premium-client-adapter.js' "$OUTPUT_ROOT/index.html"
-grep -q 'kg-only.js' "$OUTPUT_ROOT/index.html"
-grep -q 'data-hk-pwa-registration' "$OUTPUT_ROOT/index.html"
-grep -q '"display": "standalone"' "$OUTPUT_ROOT/manifest.webmanifest"
-grep -q 'home-kitchen-client-public-20260903-v6' "$OUTPUT_ROOT/sw.js"
-grep -q 'hk-kg-only-v1' "$OUTPUT_ROOT/kg-only.js"
+test -s "$OUTPUT_ROOT/app-sw.js"
+test -s "$OUTPUT_ROOT/services/client-api.js"
+test -s "$OUTPUT_ROOT/security/turnstile.js"
+echo 'PUBLIC_CLIENT_RELEASE_CHECK: PASS'
