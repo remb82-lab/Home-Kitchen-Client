@@ -1,10 +1,6 @@
 name: Client Smoke Gate
 
 on:
-  push:
-    branches:
-      - 'factory/pages-self-contained-twa-*'
-      - 'factory/client-1kg-only-*'
   pull_request:
     branches: [main]
     paths:
@@ -12,12 +8,25 @@ on:
       - '.github/workflows/smoke.yml'
       - 'scripts/build-public-pwa.sh'
       - 'smoke.mjs'
+      - 'index.html'
       - 'manifest.webmanifest'
-      - 'icon.svg'
-      - 'sw-public.js'
+      - 'app-sw.js'
+      - 'app-shell.js'
+      - 'app-shell.css'
       - 'premium-client.css'
       - 'premium-client-adapter.js'
-      - 'kg-only.js'
+      - 'client-repeat-order-adapter.js'
+      - 'data/**'
+      - 'runtime/**'
+      - 'services/**'
+      - 'security/**'
+      - 'contact/**'
+      - 'catalog/**'
+      - 'cart/**'
+      - 'checkout/**'
+      - 'orders/**'
+      - 'profile/**'
+      - 'app/**'
       - 'assets/**'
   workflow_dispatch:
 
@@ -27,7 +36,7 @@ permissions:
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - name: Checkout deployment repository
         uses: actions/checkout@v4
@@ -43,6 +52,7 @@ jobs:
       - name: Build candidate exactly like Pages
         shell: bash
         run: |
+          set -euo pipefail
           chmod +x scripts/build-public-pwa.sh
           scripts/build-public-pwa.sh
 
@@ -51,26 +61,18 @@ jobs:
         run: |
           set -euo pipefail
           test -s _site/index.html
-          test -s _site/premium-client.css
-          test -s _site/premium-client-adapter.js
-          test -s _site/kg-only.js
           test -s _site/manifest.webmanifest
-          test -s _site/icon.svg
-          test -s _site/sw.js
-          test -s _site/assets/images/placeholders/product-photo-placeholder-c-v2.1.svg
-          test -s _site/assets/products/syrniki-classic-premium.webp
-          test -s _site/assets/products/syrniki-raisins-vanilla.webp
-          test -s _site/assets/images/products/syrniki-poppy.webp
-          test -s _site/assets/images/products/cutlets-chicken-creamy.webp
-          test ! -e _site/assets/images/products/syrniki-poppy.png
-          grep -q 'rel="manifest"' _site/index.html
-          grep -q 'premium-client.css' _site/index.html
-          grep -q 'premium-client-adapter.js' _site/index.html
-          grep -q 'kg-only.js' _site/index.html
-          grep -q 'data-hk-pwa-registration' _site/index.html
-          grep -q '"display": "standalone"' _site/manifest.webmanifest
-          grep -q 'home-kitchen-client-public-20260828-v5' _site/sw.js
-          grep -q 'hk-kg-only-v1' _site/kg-only.js
+          test -s _site/app-sw.js
+          test -s _site/services/client-api.js
+          test -s _site/security/turnstile.js
+          test -s _site/checkout/checkout-controller.js
+          test -s _site/assets/branding/home-kitchen-mark.svg
+          grep -q '/functions/v1/create-client-order' _site/services/client-api.js
+          grep -q '0x4AAAAAAEvNfqWeNAvsAKeB' _site/security/turnstile.js
+          grep -q 'turnstile_token' _site/checkout/checkout-controller.js
+          grep -q 'v15' _site/app-sw.js
+          ! grep -R -q 'client-kitchen?mode=order' _site --exclude-dir=assets
+          ! grep -R -q 'TURNSTILE_SECRET_KEY' _site
 
       - name: Start static preview
         shell: bash
@@ -80,9 +82,7 @@ jobs:
           python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/home-kitchen-client-smoke.log 2>&1 &
           echo $! >/tmp/home-kitchen-client-smoke.pid
           for i in {1..20}; do
-            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then
-              exit 0
-            fi
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then exit 0; fi
             sleep 0.5
           done
           cat /tmp/home-kitchen-client-smoke.log
@@ -92,33 +92,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl -fsS http://127.0.0.1:4173/index.html -o /tmp/home-kitchen-index.html
-          grep -q 'rel="manifest"' /tmp/home-kitchen-index.html
-          grep -q 'kg-only.js' /tmp/home-kitchen-index.html
-          curl -fsS http://127.0.0.1:4173/manifest.webmanifest -o /tmp/manifest.webmanifest
-          grep -q '"display": "standalone"' /tmp/manifest.webmanifest
-          curl -fsS http://127.0.0.1:4173/sw.js -o /tmp/sw.js
-          grep -q 'home-kitchen-client-public-20260828-v5' /tmp/sw.js
-          curl -fsS http://127.0.0.1:4173/premium-client.css -o /tmp/premium-client.css
-          grep -q 'Premium Home Market' /tmp/premium-client.css
-          curl -fsS http://127.0.0.1:4173/premium-client-adapter.js -o /tmp/premium-client-adapter.js
-          grep -q 'PRODUCT_PLACEHOLDER' /tmp/premium-client-adapter.js
-          curl -fsS http://127.0.0.1:4173/assets/products/syrniki-classic-premium.webp -o /tmp/product-1.webp
-          test -s /tmp/product-1.webp
-          curl -fsS http://127.0.0.1:4173/assets/products/syrniki-raisins-vanilla.webp -o /tmp/product-2.webp
-          test -s /tmp/product-2.webp
-          curl -fsS http://127.0.0.1:4173/assets/images/products/syrniki-poppy.webp -o /tmp/product-3.webp
-          test -s /tmp/product-3.webp
-          curl -fsS http://127.0.0.1:4173/assets/images/products/cutlets-chicken-creamy.webp -o /tmp/product-20.webp
-          test -s /tmp/product-20.webp
-          curl -fsS http://127.0.0.1:4173/kg-only.js -o /tmp/kg-only.js
-          grep -q 'hk-kg-only-v1' /tmp/kg-only.js
-          grep -q 'grams:1000' /tmp/kg-only.js
+          curl -fsS http://127.0.0.1:4173/index.html | grep -q 'security/turnstile.js'
+          curl -fsS http://127.0.0.1:4173/services/client-api.js | grep -q '/functions/v1/create-client-order'
+          curl -fsS http://127.0.0.1:4173/security/turnstile.js | grep -q '0x4AAAAAAEvNfqWeNAvsAKeB'
+          curl -fsS http://127.0.0.1:4173/app-sw.js | grep -q 'v15'
 
       - name: Stop static preview
         if: always()
         shell: bash
         run: |
-          if [ -f /tmp/home-kitchen-client-smoke.pid ]; then
-            kill "$(cat /tmp/home-kitchen-client-smoke.pid)" || true
-          fi
+          if [ -f /tmp/home-kitchen-client-smoke.pid ]; then kill "$(cat /tmp/home-kitchen-client-smoke.pid)" || true; fi
