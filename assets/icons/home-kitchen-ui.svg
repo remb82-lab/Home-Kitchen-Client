@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <symbol id="home" viewBox="0 0 24 24"><path d="m3 11 9-7 9 7v9H6v-8"/><path d="M9 20v-6h6v6"/></symbol>
+  <symbol id="catalog" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></symbol>
+  <symbol id="cart" viewBox="0 0 24 24"><path d="M3 5h2l2.2 10.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 1.9-1.4L21 9H7"/><circle cx="10" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></symbol>
+  <symbol id="orders" viewBox="0 0 24 24"><path d="M7 3h10v3H7z"/><path d="M6 5H4v16h16V5h-2M8 11h8M8 15h8"/></symbol>
+  <symbol id="user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 21c.7-4.5 3.2-7 7.5-7s6.8 2.5 7.5 7"/></symbol>
+  <symbol id="more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></symbol>
+  <symbol id="chef" viewBox="0 0 24 24"><path d="M8 10a4 4 0 1 1 1-7 4 4 0 0 1 6 0 4 4 0 1 1 1 7v3H8zM8 17h8M9 21h6"/></symbol>
+  <symbol id="box" viewBox="0 0 24 24"><path d="m4 7 8-4 8 4-8 4zM4 7v10l8 4 8-4V7M12 11v10"/></symbol>
+  <symbol id="coins" viewBox="0 0 24 24"><ellipse cx="9" cy="7" rx="5" ry="3"/><path d="M4 7v4c0 1.7 2.2 3 5 3 1 0 2-.2 2.8-.5M4 11v4c0 1.7 2.2 3 5 3 .6 0 1.2-.1 1.7-.2"/><ellipse cx="16" cy="14" rx="5" ry="3"/><path d="M11 14v4c0 1.7 2.2 3 5 3s5-1.3 5-3v-4"/></symbol>
+  <symbol id="users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c.5-4 2.5-6 6-6s5.5 2 6 6M14 15c3.9-.8 6.3 1 7 4"/></symbol>
+  <symbol id="chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V5M16 20v-8M22 20H2"/></symbol>
+  <symbol id="settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 14.5l2 1.2-2 3.4-2.1-1.1a8 8 0 0 1-2.4 1.4V22h-5v-2.6A8 8 0 0 1 7.1 18L5 19.1l-2-3.4 2-1.2a8 8 0 0 1 0-3L3 10.3l2-3.4L7.1 8a8 8 0 0 1 2.4-1.4V4h5v2.6A8 8 0 0 1 16.9 8L19 6.9l2 3.4-2 1.2a8 8 0 0 1 0 3Z"/></symbol>
+  <symbol id="store" viewBox="0 0 24 24"><path d="M4 10v10h16V10M3 4h18l-1 6a3 3 0 0 1-4 0 3 3 0 0 1-4 0 3 3 0 0 1-4 0 3 3 0 0 1-4 0zM9 20v-5h6v5"/></symbol>
+  <symbol id="lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></symbol>
+  <symbol id="refresh" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M6.1 8a7 7 0 0 1 11.8-1L20 12M4 12l2.1 5a7 7 0 0 0 11.8-1"/></symbol>
+  <symbol id="back" viewBox="0 0 24 24"><path d="m14 5-7 7 7 7"/></symbol>
+  <symbol id="share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="2"/><circle cx="6" cy="12" r="2"/><circle cx="18" cy="19" r="2"/><path d="m8 11 8-5M8 13l8 5"/></symbol>
+  <symbol id="snowflake" viewBox="0 0 24 24"><path d="M12 2v20M3.3 7l17.4 10M3.3 17l17.4-10M12 2l-2 2M12 2l2 2M12 22l-2-2M12 22l2-2"/></symbol>
+  <symbol id="leaf" viewBox="0 0 24 24"><path d="M20 4C11 4 5 8 5 15c0 3 2 5 5 5 7 0 10-7 10-16Z"/><path d="M4 21c3-6 7-9 12-12"/></symbol>
+  <symbol id="eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+  <symbol id="warning" viewBox="0 0 24 24"><path d="M12 3 2.5 20h19zM12 9v5M12 18h.01"/></symbol>
+  <symbol id="repeat" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4M21 13v2a3 3 0 0 1-3 3H3"/></symbol>
+</svg>
