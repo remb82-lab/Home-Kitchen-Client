@@ -9,13 +9,13 @@
     var escapeHtml=helpers.escapeHtml;
     var fmt=helpers.fmt;
     var photoFor=helpers.photoFor;
-    var availabilityLabel=helpers.availabilityLabel;
     var badgeClass=helpers.badgeClass;
     var meta=productMeta||{};
     var id=Number(product.id);
     var photo=product.image_url||photoFor(id)||'assets/images/placeholders/product-photo-placeholder-c-v2.1.svg';
     var description=product.description||meta.local_description||'';
     var instruction=product.instruction||meta.instruction||'Инструкция уточняется.';
+    var selectedGrams=1000;
     var status=product.availability==='preorder'
       ? '<span class="badge '+badgeClass(product)+'">Под заказ</span>'
       : product.availability==='out_of_stock'
@@ -33,13 +33,19 @@
         '<span aria-hidden="true"></span>'+
       '</div>'+
       '<img class="detail-photo" data-product-image src="'+escapeHtml(photo)+'" alt="'+escapeHtml(product.name)+'">'+
-      '<div class="detail" data-hk-product-detail="client-clean-v1">'+
+      '<div class="detail" data-hk-product-detail="client-clean-v3">'+
         status+
         '<h1>'+escapeHtml(product.name)+'</h1>'+
         (description?'<div class="desc">'+escapeHtml(description)+'</div>':'')+
-        '<div class="dprices">'+
-          '<button class="dprice" type="button" data-detail-action="add-half"><span>0,5 кг</span><b>'+fmt(product.price_half)+'</b></button>'+
-          '<button class="dprice" type="button" data-detail-action="add-kilo"><span>1 кг</span><b>'+fmt(product.price_kg)+'</b></button>'+
+        '<div class="dprices dprices--kg-only">'+
+          '<div class="dprice dprice--primary"><span>Цена</span><b>'+fmt(product.price_kg)+' / кг</b></div>'+
+        '</div>'+
+        '<div class="weight-picker" role="group" aria-label="Выберите вес">'+
+          '<span class="weight-picker__label">Вес заказа</span>'+
+          '<div class="weight-picker__options">'+
+            '<button type="button" data-detail-weight="500">0,5 кг</button>'+
+            '<button type="button" data-detail-weight="1000" class="active">1 кг</button>'+
+          '</div>'+
         '</div>'+
         '<div class="info hk-client-cooking"><b>Как приготовить</b><br>'+escapeHtml(instruction)+'</div>'+
         contact+
@@ -53,13 +59,17 @@
     container.querySelectorAll('[data-detail-action="back"]').forEach(function(button){
       button.addEventListener('click',function(){helpers.go('catalog');});
     });
-    var half=container.querySelector('[data-detail-action="add-half"]');
-    if(half)half.addEventListener('click',function(){helpers.addCart(id,500);});
-    var kilo=container.querySelector('[data-detail-action="add-kilo"]');
-    if(kilo)kilo.addEventListener('click',function(){helpers.addCart(id,1000);});
+    container.querySelectorAll('[data-detail-weight]').forEach(function(button){
+      button.addEventListener('click',function(){
+        selectedGrams=Number(button.dataset.detailWeight)===500?500:1000;
+        container.querySelectorAll('[data-detail-weight]').forEach(function(item){
+          item.classList.toggle('active',item===button);
+        });
+      });
+    });
     var cart=container.querySelector('[data-detail-action="cart"]');
     if(cart)cart.addEventListener('click',function(){
-      helpers.addCart(id,500);
+      helpers.addCart(id,selectedGrams);
       helpers.openCart();
     });
     var share=container.querySelector('[data-detail-action="share"]');

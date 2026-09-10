@@ -66,7 +66,7 @@
         ? '<div class="notice error">Статус может быть устаревшим: '+helpers.escapeHtml(ref.refresh_error)+'</div>'
         : '';
 
-      return '<div class="order" data-hk-order-card="modular-v1">'+
+      return '<div class="order" data-hk-order-card="modular-v2">'+
         '<div class="row"><b>№ '+helpers.escapeHtml(order.id||'—')+'</b>'+
           '<span class="badge '+badgeClass+'">'+helpers.escapeHtml(helpers.statusText(status))+'</span></div>'+
         '<div class="small">'+helpers.escapeHtml(order.customer_name||helpers.profileName||'')+'</div>'+
@@ -81,12 +81,18 @@
           '<button class="refresh" type="button" data-hk-repeat-order="'+String(index)+'">🔁 Повторить</button>'+
         '</div>'+
       '</div>';
-    }).join(''):'<div class="empty">Заказов пока нет</div>';
+    }).join(''):
+      '<div class="empty hk-orders-empty"><b>Заказов пока нет</b><span>Выберите домашние полуфабрикаты в каталоге.</span><button class="checkout" type="button" data-orders-action="catalog">Перейти в каталог</button></div>';
 
     container.onclick=function(event){
       var refresh=event.target.closest('[data-orders-action="refresh"]');
       if(refresh&&container.contains(refresh)){
         helpers.refresh();
+        return;
+      }
+      var catalog=event.target.closest('[data-orders-action="catalog"]');
+      if(catalog&&container.contains(catalog)&&typeof helpers.go==='function'){
+        helpers.go('catalog');
       }
     };
     return true;

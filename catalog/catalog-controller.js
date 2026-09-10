@@ -1,12 +1,16 @@
 /* Home Kitchen client catalog — controller layer.
-   STO 6: bridges existing runtime state to modular data + ProductCard layers.
-   The legacy inline functions remain as rollback fallback. */
+   STO 6: bridges existing runtime state to modular data + ProductCard layers. */
 (function (global) {
   'use strict';
 
   if (!global.HKClientApi || !global.HKCatalogData || !global.HKProductCard || !global.HKProductDetail) {
     console.warn('[Home Kitchen] modular catalog dependencies are unavailable; legacy catalog stays active');
     return;
+  }
+
+  function setBackendStatus(markup){
+    var state=document.getElementById('backendState');
+    if(state)state.innerHTML=markup;
   }
 
   function categoriesModular() {
@@ -110,7 +114,7 @@
   }
 
   async function loadProductsModular() {
-    backendState.innerHTML = '<span class="dot"></span>Подключение к Supabase…';
+    setBackendStatus('<span class="dot"></span>Обновляем каталог…');
     try {
       PRODUCTS = await global.HKCatalogData.fetchProducts(global.HKClientApi.request);
       if(global.HKClientContact&&typeof global.HKClientContact.load==='function'){
@@ -120,7 +124,7 @@
       storeJson('client_api_cart', cart);
       updateCart();
 
-      backendState.innerHTML = '<span class="dot ok"></span>Supabase · каталог синхронизирован';
+      setBackendStatus('<span class="dot ok"></span>Каталог обновлён');
       if (activeCat !== 'Все' && !PRODUCTS.some(function (item) {
         return item.category === activeCat;
       })) {
@@ -131,9 +135,8 @@
       renderCatalogModular();
       return PRODUCTS;
     } catch (error) {
-      backendState.innerHTML = '<span class="dot bad"></span>Ошибка подключения к Supabase';
-      grid.innerHTML = '<div class="notice error" style="grid-column:1/-1">Не удалось загрузить каталог: ' +
-        escapeHtml(error.message) + '. Нажмите «Обновить».</div>';
+      setBackendStatus('<span class="dot bad"></span>Не удалось обновить каталог');
+      grid.innerHTML = '<div class="notice error" style="grid-column:1/-1">Не удалось загрузить каталог. Проверьте интернет и попробуйте обновить ещё раз.</div>';
       catCount.textContent = '';
       return [];
     }
@@ -158,7 +161,7 @@
     product: findProduct
   });
 
-  document.documentElement.dataset.hkCatalogArchitecture = 'modular-v1';
+  document.documentElement.dataset.hkCatalogArchitecture = 'modular-v2-client-copy';
 
   renderFiltersModular();
   renderCatalogModular();

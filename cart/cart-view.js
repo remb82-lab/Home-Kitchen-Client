@@ -13,12 +13,11 @@
     var count=Number(state.count)||0;
 
     var rows=items.length?items.map(function(item){
-      return '<div class="cartitem" data-hk-cart-row="modular-v1" data-cart-index="'+item.index+'">'+
+      return '<div class="cartitem" data-hk-cart-row="modular-v2" data-cart-index="'+item.index+'">'+
         '<img class="thumb" data-product-image src="'+escapeHtml(item.photo||'')+'" alt="'+escapeHtml(item.name||'')+'">'+
         '<div>'+
           '<div class="cname">'+escapeHtml(item.name||'')+'</div>'+
           '<div class="small">'+escapeHtml(item.weightLabel)+' · '+fmt(item.unitPrice)+'</div>'+
-          '<button type="button" class="secondary" data-cart-action="remove" data-cart-index="'+item.index+'" aria-label="Удалить '+escapeHtml(item.name||'')+'">Удалить</button>'+
         '</div>'+
         '<div class="qty">'+
           '<button type="button" data-cart-action="decrease" data-cart-index="'+item.index+'" aria-label="Уменьшить количество">−</button>'+
@@ -34,7 +33,7 @@
         '<h3>Корзина</h3>'+
         '<button class="heart" type="button" data-cart-action="clear">Очистить</button>'+
       '</div>'+
-      '<div data-hk-cart-view="modular-v1">'+rows+'</div>'+
+      '<div data-hk-cart-view="modular-v2">'+rows+'</div>'+
       '<div class="totalbox">'+
         '<div class="row"><span>Итого ('+count+' товара)</span><span class="grand">'+fmt(total)+'</span></div>'+
       '</div>'+
@@ -51,7 +50,6 @@
       else if(action==='checkout')helpers.checkout();
       else if(action==='decrease')helpers.changeQty(index,-1);
       else if(action==='increase')helpers.changeQty(index,1);
-      else if(action==='remove')helpers.remove(index);
     },{once:true});
 
     return true;
