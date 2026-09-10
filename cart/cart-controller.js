@@ -50,7 +50,7 @@
     var productItem=findProduct(id);
     var normalizedGrams=Number(grams);
     if(!productItem||productItem.availability==='out_of_stock')return;
-    if(normalizedGrams!==500&&normalizedGrams!==1000)return;
+    if(normalizedGrams!==1000)return;
 
     var existing=cart.find(function(item){
       return Number(item.product_id)===Number(id)&&Number(item.grams)===normalizedGrams;
@@ -91,9 +91,9 @@
         index:index,
         productId:Number(item.product_id),
         name:String(productItem.name||''),
-        photo:PHOTOS[String(productItem.id)]||'',
+        photo:productItem.image_url||PHOTOS[String(productItem.id)]||'',
         grams:grams,
-        weightLabel:(grams/1000).toFixed(1).replace('.',',')+' кг',
+        weightLabel:(grams/1000).toFixed(1).replace('.0','').replace('.',',')+' кг',
         qty:Number(item.qty)||0,
         unitPrice:(grams/1000)*Number(productItem.price_kg||0),
         lineTotal:lineTotalModular(item)
@@ -145,6 +145,6 @@
     open:openCartModular
   });
 
-  document.documentElement.dataset.hkCartArchitecture='modular-v1';
+  document.documentElement.dataset.hkCartArchitecture='modular-v2-kg-only';
   updateCartModular();
 })(window);
