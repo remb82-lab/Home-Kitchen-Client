@@ -14,16 +14,16 @@
 
   function statusText(status){
     var known={
-      new:'Ожидает подтверждения',
-      pending:'Ожидает подтверждения',
-      confirmed:'Подтверждён',
-      needs_production:'Готовится',
-      preparing:'Готовится',
-      ready:'Готов',
-      issued:'Выдан',
-      cancelled:'Отменён'
+      new:'Заказ принят',
+      pending:'Заказ принят',
+      confirmed:'Заказ подтверждён',
+      needs_production:'Готовим ваш заказ',
+      preparing:'Готовим ваш заказ',
+      ready:'Заказ готов к выдаче',
+      issued:'Заказ выдан',
+      cancelled:'Заказ отменён'
     };
-    return known[status]||status||'Ожидает';
+    return known[status]||status||'Заказ принят';
   }
 
   function isActive(status){
@@ -65,7 +65,8 @@
         fmt:fmt,
         statusText:statusText,
         profileName:profile&&profile.name||'',
-        refresh:refreshOrdersModular
+        refresh:refreshOrdersModular,
+        go:go
       }
     );
   }
@@ -134,7 +135,7 @@
     isActive:isActive
   });
 
-  document.documentElement.dataset.hkOrdersArchitecture='modular-v1';
+  document.documentElement.dataset.hkOrdersArchitecture='modular-v2-client-copy';
   renderOrdersModular();
   refreshCurrentOrder();
 })(window);
