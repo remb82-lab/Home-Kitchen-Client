@@ -9,7 +9,8 @@
   }
 
   function setBackendStatus(markup){
-    if(backendState)backendState.innerHTML=markup;
+    var state=document.getElementById('backendState');
+    if(state)state.innerHTML=markup;
   }
 
   function categoriesModular() {
