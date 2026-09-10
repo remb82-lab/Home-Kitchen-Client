@@ -20,9 +20,11 @@ if(html.includes('SUPABASE_SERVICE_ROLE_KEY')||html.includes('TURNSTILE_SECRET_K
 for(const token of ['/functions/v1/create-client-order','turnstile_token']){
   if(!api.includes(token))throw new Error('API boundary missing '+token);
 }
-for(const token of ['0x4AAAAAAEvNfqWeNAvsAKeB',"appearance:'interaction-only'","execution:'execute'",'.execute(widgetId)']){
+for(const token of ['0x4AAAAAAEvNfqWeNAvsAKeB',"appearance:'interaction-only'","execution:'execute'","api.execute('#'+HOST_ID)"]){
   if(!turnstile.includes(token))throw new Error('Turnstile guard missing '+token);
 }
+if(!turnstile.includes('30000'))throw new Error('Mobile Turnstile timeout must allow 30s');
+if(turnstile.includes('api.execute(widgetId)'))throw new Error('Turnstile execute must use its container selector');
 if(turnstile.includes('TURNSTILE_SECRET_KEY'))throw new Error('Turnstile secret marker leaked into frontend');
 if(!checkout.includes('HKTurnstile.getToken')||!checkout.includes('turnstile_token:turnstileToken'))throw new Error('Checkout is not protected by Turnstile');
 if(!sw.includes("`${CACHE_PREFIX}v15`"))throw new Error('PWA cache was not rotated to v15');
@@ -49,4 +51,4 @@ if(!Array.isArray(catalog)||catalog.length===0)throw new Error('Published catalo
 if(catalog.some((item)=>!Number(item.price_kg)))throw new Error('Every item must expose a valid 1kg price');
 if(!catalog.some((item)=>Number(item.id)===50))throw new Error('Product 50 missing from catalog');
 
-console.log('PASS: modular canonical client + Turnstile + live catalog; items='+catalog.length);
+console.log('PASS: modular canonical client + Turnstile mobile selector + live catalog; items='+catalog.length);
