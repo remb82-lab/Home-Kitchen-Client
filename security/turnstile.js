@@ -90,8 +90,15 @@
     return new Promise(function(resolve,reject){
       pendingResolve=resolve;
       pendingReject=reject;
-      pendingTimer=setTimeout(function(){failPending('Защитная проверка заняла слишком много времени');},15000);
-      try{api.execute(widgetId);}catch(error){failPending(error&&error.message||'Не удалось запустить защитную проверку');}
+      pendingTimer=setTimeout(function(){failPending('Защитная проверка заняла слишком много времени');},30000);
+      try{
+        // Cloudflare documents execute() with the widget container selector.
+        // Passing the render() return id here can silently leave the challenge idle
+        // in some mobile browsers, which then ends in our client timeout.
+        api.execute('#'+HOST_ID);
+      }catch(error){
+        failPending(error&&error.message||'Не удалось запустить защитную проверку');
+      }
     });
   }
 
