@@ -9,7 +9,6 @@
     var escapeHtml=helpers.escapeHtml;
     var fmt=helpers.fmt;
     var photoFor=helpers.photoFor;
-    var availabilityLabel=helpers.availabilityLabel;
     var badgeClass=helpers.badgeClass;
     var meta=productMeta||{};
     var id=Number(product.id);
@@ -33,33 +32,30 @@
         '<span aria-hidden="true"></span>'+
       '</div>'+
       '<img class="detail-photo" data-product-image src="'+escapeHtml(photo)+'" alt="'+escapeHtml(product.name)+'">'+
-      '<div class="detail" data-hk-product-detail="client-clean-v1">'+
+      '<div class="detail" data-hk-product-detail="client-clean-v2">'+
         status+
         '<h1>'+escapeHtml(product.name)+'</h1>'+
         (description?'<div class="desc">'+escapeHtml(description)+'</div>':'')+
-        '<div class="dprices">'+
-          '<button class="dprice" type="button" data-detail-action="add-half"><span>0,5 кг</span><b>'+fmt(product.price_half)+'</b></button>'+
-          '<button class="dprice" type="button" data-detail-action="add-kilo"><span>1 кг</span><b>'+fmt(product.price_kg)+'</b></button>'+
+        '<div class="dprices dprices--kg-only">'+
+          '<button class="dprice dprice--primary" type="button" data-detail-action="add-kilo"><span>Цена за 1 кг</span><b>'+fmt(product.price_kg)+' / кг</b><small>Добавить 1 кг</small></button>'+
         '</div>'+
         '<div class="info hk-client-cooking"><b>Как приготовить</b><br>'+escapeHtml(instruction)+'</div>'+
         contact+
         preorder+
         '<div class="actions hk-client-detail-actions">'+
           '<button class="secondary" type="button" data-detail-action="share">Поделиться</button>'+
-          '<button class="primary" type="button" data-detail-action="cart"'+(product.availability==='out_of_stock'?' disabled':'')+'>🛒 В корзину</button>'+
+          '<button class="primary" type="button" data-detail-action="cart"'+(product.availability==='out_of_stock'?' disabled':'')+'>🛒 Добавить 1 кг</button>'+
         '</div>'+
       '</div>';
 
     container.querySelectorAll('[data-detail-action="back"]').forEach(function(button){
       button.addEventListener('click',function(){helpers.go('catalog');});
     });
-    var half=container.querySelector('[data-detail-action="add-half"]');
-    if(half)half.addEventListener('click',function(){helpers.addCart(id,500);});
     var kilo=container.querySelector('[data-detail-action="add-kilo"]');
     if(kilo)kilo.addEventListener('click',function(){helpers.addCart(id,1000);});
     var cart=container.querySelector('[data-detail-action="cart"]');
     if(cart)cart.addEventListener('click',function(){
-      helpers.addCart(id,500);
+      helpers.addCart(id,1000);
       helpers.openCart();
     });
     var share=container.querySelector('[data-detail-action="share"]');
