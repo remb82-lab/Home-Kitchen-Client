@@ -44,14 +44,14 @@
         var grams = Number(item && item.grams);
         var qty = Number(item && item.qty);
         return findProduct(productId) &&
-          (grams === 500 || grams === 1000) &&
+          grams === 1000 &&
           Number.isSafeInteger(qty) &&
           qty > 0;
       })
       .map(function (item) {
         return {
           product_id: safeProductId(item.product_id),
-          grams: Number(item.grams),
+          grams: 1000,
           qty: Number(item.qty)
         };
       });
