@@ -1,19 +1,17 @@
 /* Home Kitchen client profile — presentation layer.
-   STO 6.6: renders existing profile controls only. */
+   Client-facing profile contains only customer data. */
 (function(global){
   'use strict';
 
   function render(section,state){
     if(!section)return false;
-    section.setAttribute('data-hk-profile-view','modular-v1');
+    section.setAttribute('data-hk-profile-view','client-clean-v2');
 
     var name=section.querySelector('#pname');
     var phone=section.querySelector('#pphone');
-    var backend=section.querySelector('#pbackend');
 
     if(name)name.value=state.name||'';
     if(phone)phone.value=state.phone||'';
-    if(backend)backend.value=state.backendLabel||'Supabase Cloud';
     return true;
   }
 
