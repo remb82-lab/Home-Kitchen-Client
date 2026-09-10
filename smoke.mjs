@@ -20,7 +20,7 @@ if(html.includes('SUPABASE_SERVICE_ROLE_KEY')||html.includes('TURNSTILE_SECRET_K
 for(const token of ['/functions/v1/create-client-order','turnstile_token']){
   if(!api.includes(token))throw new Error('API boundary missing '+token);
 }
-for(const token of ['0x4AAAAAAEvNfqWeNAvsAKeB',"appearance:'interaction-only'","execution:'execute'",'turnstile.execute']){
+for(const token of ['0x4AAAAAAEvNfqWeNAvsAKeB',"appearance:'interaction-only'","execution:'execute'",'.execute(widgetId)']){
   if(!turnstile.includes(token))throw new Error('Turnstile guard missing '+token);
 }
 if(turnstile.includes('TURNSTILE_SECRET_KEY'))throw new Error('Turnstile secret marker leaked into frontend');
