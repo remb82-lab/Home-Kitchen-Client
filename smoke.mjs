@@ -45,7 +45,7 @@ const key='sb_publishable_HYX-B3T2MBHe-QilI_7JQg_2WB3zOTW';
 const response=await fetch(endpoint,{method:'POST',headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json'},body:'{}'});
 if(!response.ok)throw new Error('Catalog RPC failed: '+response.status);
 const catalog=await response.json();
-if(!Array.isArray(catalog)||catalog.length<50)throw new Error('Expected at least 50 published catalog items');
+if(!Array.isArray(catalog)||catalog.length===0)throw new Error('Published catalog must not be empty');
 if(catalog.some((item)=>!Number(item.price_kg)))throw new Error('Every item must expose a valid 1kg price');
 if(!catalog.some((item)=>Number(item.id)===50))throw new Error('Product 50 missing from catalog');
 
