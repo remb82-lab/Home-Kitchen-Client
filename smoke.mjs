@@ -11,6 +11,7 @@ const cartView=await read('cart/cart-view.js');
 const cart=await read('cart/cart-controller.js');
 const ordersView=await read('orders/orders-view.js');
 const orders=await read('orders/orders-controller.js');
+const repeatOrder=await read('client-repeat-order-adapter.js');
 const profile=await read('profile/profile-view.js');
 const sw=await read('app-sw.js');
 const builder=await read('scripts/build-public-pwa.sh');
@@ -36,6 +37,7 @@ if(!detail.includes('price_kg')||detail.includes('price_half')||detail.includes(
 for(const token of ['Вес заказа','data-detail-weight="500"','data-detail-weight="1000"'])if(!detail.includes(token))throw new Error('Weight selector missing '+token);
 if(cartView.includes('>Удалить<')||cartView.includes('data-cart-action="remove"'))throw new Error('Cart row must not expose a separate Delete button');
 if(!ordersView.includes('Перейти в каталог'))throw new Error('Empty orders state must contain a catalog CTA');
+if(!ordersView.includes('data-hk-open-orders')||!repeatOrder.includes("event.target.closest('[data-hk-open-orders]')"))throw new Error('Open order action must be wired to the repeat-order navigation handler');
 for(const token of ["new:'Заказ принят'","needs_production:'Готовим ваш заказ'","ready:'Заказ готов к выдаче'"])if(!orders.includes(token))throw new Error('Customer order status copy missing '+token);
 if(profile.includes('#pbackend')||profile.includes('Supabase Cloud'))throw new Error('Profile view must contain only customer data');
 
