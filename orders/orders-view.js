@@ -46,7 +46,7 @@
         '<span>Позиции: <b>'+String(Array.isArray(order.items)?order.items.length:0)+'</b></span>'+
       '</div>'+
       '<div class="hk-current-order-card__actions">'+
-        '<button type="button" class="secondary" data-orders-action="open">Открыть заказ</button>'+
+        '<button type="button" class="secondary" data-hk-open-orders>Открыть заказ</button>'+
         '<button type="button" class="primary" data-hk-repeat-order="'+String(entry.index)+'">Заказать снова</button>'+
       '</div>';
     return true;
