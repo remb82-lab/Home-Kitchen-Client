@@ -74,7 +74,7 @@ jobs:
           grep -q '/functions/v1/create-client-order' _site/services/client-api.js
           grep -q '0x4AAAAAAEvNfqWeNAvsAKeB' _site/security/turnstile.js
           grep -q 'turnstile_token' _site/checkout/checkout-controller.js
-          grep -q 'v16' _site/app-sw.js
+          grep -q 'v17' _site/app-sw.js
           grep -q '<span>Цена</span>' _site/catalog/product-card.js
           ! grep -q 'Цена за 1 кг' _site/catalog/product-card.js
           grep -q 'Вес заказа' _site/catalog/product-detail.js
@@ -107,7 +107,7 @@ jobs:
           curl -fsS http://127.0.0.1:4173/index.html | grep -q 'security/turnstile.js'
           curl -fsS http://127.0.0.1:4173/services/client-api.js | grep -q '/functions/v1/create-client-order'
           curl -fsS http://127.0.0.1:4173/security/turnstile.js | grep -q '0x4AAAAAAEvNfqWeNAvsAKeB'
-          curl -fsS http://127.0.0.1:4173/app-sw.js | grep -q 'v16'
+          curl -fsS http://127.0.0.1:4173/app-sw.js | grep -q 'v17'
           curl -fsS http://127.0.0.1:4173/catalog/product-card.js | grep -q '<span>Цена</span>'
           curl -fsS http://127.0.0.1:4173/client-repeat-order-adapter.js | grep -q 'hk-current-order-card__head'
 

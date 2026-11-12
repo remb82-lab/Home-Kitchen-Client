@@ -27,7 +27,7 @@ grep -q "appearance:'interaction-only'" "$OUTPUT_ROOT/security/turnstile.js"
 grep -q "execution:'execute'" "$OUTPUT_ROOT/security/turnstile.js"
 grep -q 'turnstile_token' "$OUTPUT_ROOT/checkout/checkout-controller.js"
 grep -q 'security/turnstile.js' "$OUTPUT_ROOT/index.html"
-grep -q 'v16' "$OUTPUT_ROOT/app-sw.js"
+grep -q 'v17' "$OUTPUT_ROOT/app-sw.js"
 
 grep -q '<span>Цена</span>' "$OUTPUT_ROOT/catalog/product-card.js"
 ! grep -q 'Цена за 1 кг' "$OUTPUT_ROOT/catalog/product-card.js"

@@ -83,7 +83,7 @@
       '<div class="thanks" data-hk-checkout-success="modular-v1">'+
         '<div class="ok">✓</div>'+
         '<h2>Заказ принят</h2>'+
-        '<p>'+(missing>0?'Часть заказа нужно приготовить. Хозяйка увидит нехватку автоматически.':'Товар зарезервирован.')+'</p>'+
+        '<p>'+(ref.details_pending?'Заказ сохранён. Подробности можно обновить в разделе «Заказы».':missing>0?'Часть заказа нужно приготовить. Хозяйка увидит нехватку автоматически.':'Товар зарезервирован.')+'</p>'+
         warning+
         '<div class="totalbox">'+
           '<div class="row"><span>Номер заказа</span><b>№ '+helpers.escapeHtml(displayNumber)+'</b></div>'+

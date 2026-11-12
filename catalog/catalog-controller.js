@@ -163,6 +163,5 @@
 
   document.documentElement.dataset.hkCatalogArchitecture = 'modular-v2-client-copy';
 
-  renderFiltersModular();
-  renderCatalogModular();
+  // app/bootstrap renders after Cart and Navigation have registered their APIs.
 })(window);

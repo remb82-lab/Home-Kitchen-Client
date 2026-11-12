@@ -44,7 +44,7 @@ if(!ordersView.includes('data-hk-open-orders')||!repeatOrder.includes("event.tar
 for(const token of ["new:'Заказ принят'","needs_production:'Готовим ваш заказ'","ready:'Заказ готов к выдаче'"])if(!orders.includes(token))throw new Error('Customer order status copy missing '+token);
 if(profile.includes('#pbackend')||profile.includes('Supabase Cloud'))throw new Error('Profile view must contain only customer data');
 
-if(!sw.includes("`${CACHE_PREFIX}v16`"))throw new Error('PWA cache was not rotated to v16');
+if(!sw.includes("`${CACHE_PREFIX}v17`"))throw new Error('PWA cache was not rotated to v17');
 if(!sw.includes('./security/turnstile.js'))throw new Error('PWA cache must include Turnstile guard');
 if(!builder.includes('PUBLIC_CLIENT_RELEASE_CHECK: PASS'))throw new Error('Public package release gate missing');
 if(manifest.display!=='standalone'||manifest.start_url!=='./'||manifest.scope!=='./')throw new Error('PWA manifest contract changed');

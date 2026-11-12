@@ -115,11 +115,9 @@
         var token=created&&created.public_token;
         if(!token)throw new Error('Сервер не вернул номер отслеживания заказа');
 
-        var createdOrder=await cloudFetch(
-          SUPABASE_URL+'/rest/v1/rpc/get_client_order',
-          {method:'POST',body:JSON.stringify({p_token:token})}
-        );
-        return {public_token:token,order:createdOrder};
+        // A committed order is already successful. Return its receipt before
+        // optional detail reads, so the controller can persist it immediately.
+        return {public_token:token,order:created,details_pending:true};
       }
 
       if(path.indexOf('/api/client/orders/')===0){

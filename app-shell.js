@@ -95,7 +95,7 @@
     if (!('serviceWorker' in navigator) || !window.isSecureContext) return;
 
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('./app-sw.js?v=20260910-client-ux-1', { scope: './', updateViaCache: 'none' })
+      navigator.serviceWorker.register('./app-sw.js?v=20261017-checkout-1', { scope: './', updateViaCache: 'none' })
         .then(function (registration) {
           registration.update().catch(function () {});
         })
