@@ -16,11 +16,17 @@
 
   function normalizedProfile(value){
     var source=value&&typeof value==='object'&&!Array.isArray(value)?value:{};
-    return {name:String(source.name||''),phone:String(source.phone||'')};
+    return {
+      name:String(source.name||''),
+      phone:String(source.phone||'')
+    };
   }
 
   function renderProfile(){
-    global.HKProfileView.render(section(),{name:profile.name,phone:profile.phone});
+    global.HKProfileView.render(section(),{
+      name:profile.name,
+      phone:profile.phone
+    });
   }
 
   function loadProfileModular(){
@@ -39,11 +45,20 @@
     return profile;
   }
 
-  function getProfile(){return normalizedProfile(profile);}
+  function getProfile(){
+    return normalizedProfile(profile);
+  }
 
   global.loadProfile=loadProfileModular;
   global.saveProfile=saveProfileModular;
-  global.HKProfileController=Object.freeze({storageKey:STORAGE_KEY,load:loadProfileModular,save:saveProfileModular,get:getProfile});
+
+  global.HKProfileController=Object.freeze({
+    storageKey:STORAGE_KEY,
+    load:loadProfileModular,
+    save:saveProfileModular,
+    get:getProfile
+  });
+
   document.documentElement.dataset.hkProfileArchitecture='modular-v2-client-clean';
   loadProfileModular();
 })(window);

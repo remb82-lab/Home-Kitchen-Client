@@ -71,6 +71,7 @@
   function mountSuccess(container,ref,historyWarning,helpers){
     if(!container)return false;
     var order=ref&&ref.order||{};
+    var displayNumber=String(order.order_number||order.id||'—');
     var missing=(order.items||[]).reduce(function(sum,item){
       return sum+(Number(item.missing_grams)||0);
     },0);
@@ -85,7 +86,7 @@
         '<p>'+(missing>0?'Часть заказа нужно приготовить. Хозяйка увидит нехватку автоматически.':'Товар зарезервирован.')+'</p>'+
         warning+
         '<div class="totalbox">'+
-          '<div class="row"><span>Номер заказа</span><b>№ '+helpers.escapeHtml(order.id||'—')+'</b></div>'+
+          '<div class="row"><span>Номер заказа</span><b>№ '+helpers.escapeHtml(displayNumber)+'</b></div>'+
           '<div class="row" style="margin-top:8px"><span>Статус</span><b>'+helpers.escapeHtml(helpers.statusText(order.status))+'</b></div>'+
           '<div class="row" style="margin-top:8px"><span>Итого</span><b>'+helpers.fmt(order.total_amount)+'</b></div>'+
         '</div>'+
