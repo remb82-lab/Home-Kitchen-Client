@@ -19,6 +19,9 @@
       throw new Error('Модуль каталога не загружен');
     }
     await global.loadProducts();
+    if(global.HKOrdersController&&typeof global.HKOrdersController.refreshCurrentOrder==='function'){
+      global.HKOrdersController.refreshCurrentOrder().catch(function(){});
+    }
 
     document.documentElement.dataset.hkClientBootstrap='ready';
   }

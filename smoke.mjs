@@ -17,8 +17,11 @@ const sw=await read('app-sw.js');
 const builder=await read('scripts/build-public-pwa.sh');
 const manifest=JSON.parse(await read('manifest.webmanifest'));
 
-const requiredHtml=['Домашняя кухня','Каталог','Мои заказы','Профиль','security/turnstile.js','services/client-api.js','cart/cart-controller.js'];
+const adapter=await read('premium-client-adapter.js');
+// Thin shell: index.html boots Turnstile + the adapter; the adapter loads the catalog/cart/api modules.
+const requiredHtml=['Домашняя кухня','Каталог','Мои заказы','Профиль','security/turnstile.js','premium-client-adapter.js'];
 for(const token of requiredHtml){if(!html.includes(token))throw new Error('Missing public UI/module token: '+token);}
+for(const token of ['services/client-api.js','cart/cart-controller.js']){if(!adapter.includes(token))throw new Error('Client adapter does not load module: '+token);}
 if(!cart.includes('global.openCart=openCartModular'))throw new Error('Modular cart controller is not wired');
 if(html.includes('client-kitchen?mode=order'))throw new Error('Legacy order endpoint must not ship');
 if(html.includes('kg-only.js'))throw new Error('Legacy 1kg override must not ship');
@@ -41,7 +44,7 @@ if(!ordersView.includes('data-hk-open-orders')||!repeatOrder.includes("event.tar
 for(const token of ["new:'Заказ принят'","needs_production:'Готовим ваш заказ'","ready:'Заказ готов к выдаче'"])if(!orders.includes(token))throw new Error('Customer order status copy missing '+token);
 if(profile.includes('#pbackend')||profile.includes('Supabase Cloud'))throw new Error('Profile view must contain only customer data');
 
-if(!sw.includes("`${CACHE_PREFIX}v16`"))throw new Error('PWA cache was not rotated to v16');
+if(!sw.includes("`${CACHE_PREFIX}v18`"))throw new Error('PWA cache was not rotated to v18');
 if(!sw.includes('./security/turnstile.js'))throw new Error('PWA cache must include Turnstile guard');
 if(!builder.includes('PUBLIC_CLIENT_RELEASE_CHECK: PASS'))throw new Error('Public package release gate missing');
 if(manifest.display!=='standalone'||manifest.start_url!=='./'||manifest.scope!=='./')throw new Error('PWA manifest contract changed');
