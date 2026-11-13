@@ -1,11 +1,27 @@
 /* Home Kitchen client — app-first PWA bootstrap.
-   Browser is a fallback. Installed standalone/TWA mode is the preferred UX. */
+   Browser is a fallback. Installed standalone/TWA mode is the preferred UX.
+   The install bar is shown only after real engagement (first add-to-cart or a
+   repeat visit), is compact, and remembers dismissal. */
 (function () {
   'use strict';
 
   var DISMISS_KEY = 'hk:pwa-install-dismissed-at';
-  var DISMISS_FOR_MS = 24 * 60 * 60 * 1000;
+  var VISITS_KEY = 'hk:visit-count';
+  var DISMISS_FOR_MS = 14 * 24 * 60 * 60 * 1000;
   var deferredInstallPrompt = null;
+  var engaged = false;
+
+  function readStorage(key) {
+    try { return window.localStorage.getItem(key); } catch (error) { return null; }
+  }
+
+  function writeStorage(key, value) {
+    try { window.localStorage.setItem(key, value); } catch (error) { /* storage may be blocked */ }
+  }
+
+  function removeStorage(key) {
+    try { window.localStorage.removeItem(key); } catch (error) { /* storage may be blocked */ }
+  }
 
   function isStandalone() {
     return window.matchMedia && window.matchMedia('(display-mode: standalone)').matches ||
@@ -19,9 +35,13 @@
   }
 
   function recentlyDismissed() {
-    var raw = window.localStorage.getItem(DISMISS_KEY);
+    var raw = readStorage(DISMISS_KEY);
     var dismissedAt = raw ? Number(raw) : 0;
     return Number.isFinite(dismissedAt) && Date.now() - dismissedAt < DISMISS_FOR_MS;
+  }
+
+  function canOfferInstall() {
+    return !isStandalone() && (Boolean(deferredInstallPrompt) || isIos());
   }
 
   function hideInstallCard() {
@@ -29,66 +49,80 @@
     if (card) card.remove();
   }
 
-  function showInstallHelp() {
-    var message = isIos()
+  function installHelpText() {
+    return isIos()
       ? 'На iPhone: нажмите «Поделиться», затем «На экран Домой».'
       : 'Откройте меню браузера и выберите «Установить приложение» или «Добавить на главный экран».';
+  }
 
-    var hint = document.getElementById('hk-app-install-hint');
-    if (hint) {
+  function showInstallHelp() {
+    var message = installHelpText();
+    var shown = false;
+    ['hk-app-install-hint', 'hk-install-help'].forEach(function (id) {
+      var hint = document.getElementById(id);
+      if (!hint) return;
       hint.textContent = message;
       hint.hidden = false;
+      shown = true;
+    });
+    if (!shown && typeof window.toast === 'function') window.toast(message, false);
+  }
+
+  async function runInstall() {
+    if (!deferredInstallPrompt) {
+      showInstallHelp();
       return;
     }
-
-    if (typeof window.showNotification === 'function') {
-      window.showNotification(message);
+    try {
+      deferredInstallPrompt.prompt();
+      var choice = await deferredInstallPrompt.userChoice;
+      if (choice && choice.outcome === 'accepted') hideInstallCard();
+    } finally {
+      deferredInstallPrompt = null;
     }
   }
 
   function buildInstallCard() {
-    if (isStandalone() || recentlyDismissed() || document.getElementById('hk-app-install-card')) return;
+    if (!engaged || !canOfferInstall() || recentlyDismissed() || document.getElementById('hk-app-install-card')) return;
 
     var card = document.createElement('aside');
     card.id = 'hk-app-install-card';
     card.className = 'hk-app-install-card';
-    card.setAttribute('role', 'dialog');
-    card.setAttribute('aria-label', 'Установить Home Kitchen');
+    card.setAttribute('role', 'region');
+    card.setAttribute('aria-label', 'Установить Домашняя кухня');
     card.innerHTML = '' +
       '<div class="hk-app-install-card__mark" aria-hidden="true">' +
         '<img src="assets/branding/home-kitchen-mark.svg" alt="">' +
       '</div>' +
       '<div class="hk-app-install-card__body">' +
-        '<strong>Home Kitchen удобнее как приложение</strong>' +
-        '<span>Без адресной строки браузера, с иконкой на телефоне.</span>' +
+        '<strong>Добавьте на экран телефона</strong>' +
         '<small id="hk-app-install-hint" hidden></small>' +
-        '<div class="hk-app-install-card__actions">' +
-          '<button type="button" class="hk-app-install-card__primary" data-hk-install>Установить приложение</button>' +
-          '<button type="button" class="hk-app-install-card__secondary" data-hk-stay>Остаться на сайте</button>' +
-        '</div>' +
-      '</div>';
+      '</div>' +
+      '<button type="button" class="hk-app-install-card__primary" data-hk-install>Установить</button>' +
+      '<button type="button" class="hk-app-install-card__close" data-hk-stay aria-label="Остаться на сайте" title="Остаться на сайте">×</button>';
 
-    card.querySelector('[data-hk-install]').addEventListener('click', async function () {
-      if (!deferredInstallPrompt) {
-        showInstallHelp();
-        return;
-      }
-
-      try {
-        deferredInstallPrompt.prompt();
-        var choice = await deferredInstallPrompt.userChoice;
-        if (choice && choice.outcome === 'accepted') hideInstallCard();
-      } finally {
-        deferredInstallPrompt = null;
-      }
-    });
-
+    card.querySelector('[data-hk-install]').addEventListener('click', runInstall);
     card.querySelector('[data-hk-stay]').addEventListener('click', function () {
-      window.localStorage.setItem(DISMISS_KEY, String(Date.now()));
+      writeStorage(DISMISS_KEY, String(Date.now()));
       hideInstallCard();
     });
 
     document.body.appendChild(card);
+  }
+
+  function markEngaged() {
+    if (engaged) return;
+    engaged = true;
+    // Let the add-to-cart feedback settle before offering anything.
+    window.setTimeout(buildInstallCard, 1200);
+  }
+
+  function bindProfileInstall() {
+    document.addEventListener('click', function (event) {
+      var button = event.target.closest && event.target.closest('[data-hk-install-open]');
+      if (!button) return;
+      runInstall();
+    });
   }
 
   function registerServiceWorker() {
@@ -131,19 +165,23 @@
 
   window.addEventListener('appinstalled', function () {
     deferredInstallPrompt = null;
-    window.localStorage.removeItem(DISMISS_KEY);
+    removeStorage(DISMISS_KEY);
     hideInstallCard();
     markDisplayMode();
   });
+
+  document.addEventListener('hk:cart-add', markEngaged);
 
   function boot() {
     markDisplayMode();
     bindServiceWorkerUpgradeReload();
     registerServiceWorker();
+    bindProfileInstall();
 
-    if (!isStandalone()) {
-      window.setTimeout(buildInstallCard, isIos() ? 900 : 1600);
-    }
+    // Second and later visits count as engagement.
+    var visits = Number(readStorage(VISITS_KEY)) || 0;
+    writeStorage(VISITS_KEY, String(visits + 1));
+    if (visits >= 1) window.setTimeout(markEngaged, 6000);
   }
 
   if (document.readyState === 'loading') {

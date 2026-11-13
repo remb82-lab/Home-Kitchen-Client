@@ -3,6 +3,8 @@
 (function(global){
   'use strict';
 
+  var PHONE_ICON='<svg class="hk-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>';
+
   function normalize(value){
     var source=value&&typeof value==='object'?value:{};
     return {
@@ -29,19 +31,28 @@
     var href=telHref(contact.phone);
     if(!contact.phone||!href)return '';
     var escape=typeof global.escapeHtml==='function'?global.escapeHtml:function(value){return String(value||'');};
-    return '<div class="client-order-phone client-order-phone--inline" data-hk-client-contact="'+escape(variant||'inline')+'">'+
-      '<div class="client-order-phone__copy">'+
-        '<span class="client-order-phone__label">Заказ по телефону</span>'+
-        '<a class="client-order-phone__number" href="'+escape(href)+'">'+escape(contact.phone)+'</a>'+
-      '</div>'+
-      '<a class="client-order-phone__call" href="'+escape(href)+'" aria-label="Позвонить для заказа">Позвонить</a>'+
+    var kind=variant||'inline';
+
+    // Catalog: one compact icon button in the header. The number stays reachable via tel: and the label.
+    if(kind==='catalog'){
+      return '<a class="client-order-phone__call client-order-phone__call--icon" data-hk-client-contact="catalog" href="'+escape(href)+'"'+
+        ' aria-label="Позвонить для заказа: '+escape(contact.phone)+'" title="Заказ по телефону: '+escape(contact.phone)+'">'+
+        PHONE_ICON+'</a>';
+    }
+
+    // Detail, checkout, profile: one slim line.
+    return '<div class="client-order-phone client-order-phone--inline" data-hk-client-contact="'+escape(kind)+'">'+
+      '<span class="client-order-phone__label">Заказ по телефону</span>'+
+      '<a class="client-order-phone__number" href="'+escape(href)+'">'+escape(contact.phone)+'</a>'+
+      '<a class="client-order-phone__call" href="'+escape(href)+'" aria-label="Позвонить для заказа">'+PHONE_ICON+'Позвонить</a>'+
     '</div>';
   }
 
   function renderCatalog(){
     var host=document.getElementById('clientOrderPhone');
-    if(!host)return;
-    host.innerHTML=markup('catalog');
+    if(host)host.innerHTML=markup('catalog');
+    var profileHost=document.getElementById('profileContact');
+    if(profileHost)profileHost.innerHTML=markup('profile');
   }
 
   function set(value){

@@ -37,11 +37,13 @@
       {
         name:profile.name||'',
         phone:profile.phone||'',
-        total:typeof global.total==='function'?global.total():0
+        total:typeof global.total==='function'?global.total():0,
+        count:global.HKCartController&&typeof global.HKCartController.count==='function'?global.HKCartController.count():0
       },
       {
         escapeHtml:escapeHtml,
         fmt:fmt,
+        countLabel:global.countLabel,
         contactMarkup:function(variant){
           return global.HKClientContact&&typeof global.HKClientContact.markup==='function'
             ? global.HKClientContact.markup(variant)
