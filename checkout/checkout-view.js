@@ -13,34 +13,87 @@
   function mountForm(container,state,helpers){
     if(!container)return false;
     var contact=typeof helpers.contactMarkup==='function'?helpers.contactMarkup('checkout'):'';
+    var count=Number(state.count)||0;
+    var countText=count&&typeof helpers.countLabel==='function'?helpers.countLabel(count,['товар','товара','товаров']):'';
     container.innerHTML=
       '<div class="detail-head">'+
         '<button class="back" type="button" data-checkout-action="back">‹</button>'+
         '<h3>Оформление заказа</h3><span></span>'+
       '</div>'+
       '<div class="form" data-hk-checkout-view="modular-v1">'+
-        '<label>Способ получения<input value="Самовывоз" disabled></label>'+
-        '<label>Имя<input id="coName" value="'+helpers.escapeHtml(state.name||'')+'"></label>'+
-        '<label>Телефон / мессенджер<input id="coPhone" value="'+helpers.escapeHtml(state.phone||'')+'"></label>'+
-        '<label>Комментарий<textarea id="coComment" rows="3"></textarea></label>'+
+        '<div class="form-static"><span>Способ получения</span><b>Самовывоз</b></div>'+
+        '<label for="coName">Имя'+
+          '<input id="coName" name="name" type="text" autocomplete="name" autocapitalize="words" enterkeyhint="next" required aria-describedby="coNameErr" value="'+helpers.escapeHtml(state.name||'')+'">'+
+          '<span class="field-error" id="coNameErr" role="alert" hidden></span></label>'+
+        '<label for="coPhone">Телефон или мессенджер'+
+          '<input id="coPhone" name="tel" type="tel" inputmode="tel" autocomplete="tel" enterkeyhint="next" placeholder="+375 29 123-45-67" aria-describedby="coPhoneHint coPhoneErr" value="'+helpers.escapeHtml(state.phone||'')+'">'+
+          '<span class="field-hint" id="coPhoneHint">Чтобы кухня могла связаться с вами по заказу.</span>'+
+          '<span class="field-error" id="coPhoneErr" role="alert" hidden></span></label>'+
+        '<label for="coComment">Комментарий'+
+          '<textarea id="coComment" name="comment" rows="3" enterkeyhint="done" placeholder="Например, удобное время самовывоза"></textarea></label>'+
       '</div>'+
       contact+
       '<div class="totalbox">'+
-        '<div class="row"><b>Предварительно</b><span class="grand">'+helpers.fmt(state.total)+'</span></div>'+
-        '<div class="small">Окончательная сумма и резерв проверяются при создании заказа.</div>'+
+        '<div class="row"><b>Итого к оплате</b><span class="grand">'+helpers.fmt(state.total)+'</span></div>'+
+        (countText?'<div class="small">В заказе: '+countText+'.</div>':'')+
+        '<div class="small">Окончательную сумму и наличие подтверждает кухня после проверки заказа.</div>'+
       '</div>'+
       '<button id="checkoutSubmit" class="checkout" type="button" data-checkout-action="submit">Подтвердить заказ</button>';
 
     bind(container,function(action){
       if(action==='back')helpers.back();
       if(action==='submit'){
-        helpers.submit({
+        var values={
           name:(container.querySelector('#coName')?.value||'').trim(),
           phone:(container.querySelector('#coPhone')?.value||'').trim(),
           comment:(container.querySelector('#coComment')?.value||'').trim()
-        });
+        };
+        if(!validate(container,values))return;
+        helpers.submit(values);
       }
     });
+
+    ['coName','coPhone'].forEach(function(id){
+      var input=container.querySelector('#'+id);
+      if(input)input.addEventListener('input',function(){showError(container,id,'');});
+    });
+    return true;
+  }
+
+  function showError(container,id,message){
+    var input=container.querySelector('#'+id);
+    var error=container.querySelector('#'+id+'Err');
+    if(error){
+      error.textContent=message||'';
+      error.hidden=!message;
+    }
+    if(input){
+      if(message)input.setAttribute('aria-invalid','true');
+      else input.removeAttribute('aria-invalid');
+    }
+  }
+
+  // Presentation-level validation only: the order payload and API rules are unchanged.
+  function validate(container,values){
+    var firstInvalid=null;
+    if(!values.name){
+      showError(container,'coName','Укажите имя, чтобы кухня знала, как к вам обращаться.');
+      firstInvalid=container.querySelector('#coName');
+    }else showError(container,'coName','');
+
+    var phone=values.phone;
+    var digits=phone.replace(/\D/g,'');
+    var looksLikeHandle=/^@?[A-Za-z0-9_.]{4,}$/.test(phone);
+    if(phone&&digits.length<7&&!looksLikeHandle){
+      showError(container,'coPhone','Проверьте номер. Пример: +375 29 123-45-67 или @ник в мессенджере.');
+      if(!firstInvalid)firstInvalid=container.querySelector('#coPhone');
+    }else showError(container,'coPhone','');
+
+    if(firstInvalid){
+      firstInvalid.focus();
+      if(typeof firstInvalid.scrollIntoView==='function')firstInvalid.scrollIntoView({block:'center',behavior:'smooth'});
+      return false;
+    }
     return true;
   }
 
@@ -71,6 +124,7 @@
   function mountSuccess(container,ref,historyWarning,helpers){
     if(!container)return false;
     var order=ref&&ref.order||{};
+    var displayNumber=String(order.order_number||order.id||'—');
     var missing=(order.items||[]).reduce(function(sum,item){
       return sum+(Number(item.missing_grams)||0);
     },0);
@@ -82,10 +136,10 @@
       '<div class="thanks" data-hk-checkout-success="modular-v1">'+
         '<div class="ok">✓</div>'+
         '<h2>Заказ принят</h2>'+
-        '<p>'+(missing>0?'Часть заказа нужно приготовить. Хозяйка увидит нехватку автоматически.':'Товар зарезервирован.')+'</p>'+
+        '<p>'+(ref.details_pending?'Заказ сохранён. Подробности можно обновить в разделе «Заказы».':missing>0?'Часть заказа нужно приготовить. Хозяйка увидит нехватку автоматически.':'Товар зарезервирован.')+'</p>'+
         warning+
         '<div class="totalbox">'+
-          '<div class="row"><span>Номер заказа</span><b>№ '+helpers.escapeHtml(order.id||'—')+'</b></div>'+
+          '<div class="row"><span>Номер заказа</span><b>№ '+helpers.escapeHtml(displayNumber)+'</b></div>'+
           '<div class="row" style="margin-top:8px"><span>Статус</span><b>'+helpers.escapeHtml(helpers.statusText(order.status))+'</b></div>'+
           '<div class="row" style="margin-top:8px"><span>Итого</span><b>'+helpers.fmt(order.total_amount)+'</b></div>'+
         '</div>'+

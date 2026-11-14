@@ -58,6 +58,7 @@
     if(existing)existing.qty=Number(existing.qty||0)+1;
     else cart.push({product_id:Number(id),grams:normalizedGrams,qty:1});
     saveCartModular();
+    try{document.dispatchEvent(new CustomEvent('hk:cart-add',{detail:{productId:Number(id),grams:normalizedGrams}}));}catch(error){}
   }
 
   function changeQtyModular(index,delta){
@@ -112,6 +113,7 @@
       {
         escapeHtml:escapeHtml,
         fmt:fmt,
+        countLabel:global.countLabel,
         go:go,
         clear:clearCartModular,
         checkout:function(){if(typeof global.openCheckout==='function')global.openCheckout();},

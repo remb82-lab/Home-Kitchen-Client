@@ -1,24 +1,30 @@
 {
-  "name": "Домашняя кухня",
-  "short_name": "Домашняя кухня",
-  "description": "Клиентское приложение домашней кухни: каталог, корзина и заказы.",
+  "id": "./",
+  "name": "Home Kitchen",
+  "short_name": "Home Kitchen",
+  "description": "Домашняя кухня — каталог, корзина и заказы.",
   "lang": "ru",
+  "dir": "ltr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f7f3e9",
-  "theme_color": "#1f5a47",
+  "display_override": ["standalone"],
   "orientation": "portrait-primary",
+  "background_color": "#FFF6E4",
+  "theme_color": "#0B4B31",
+  "categories": ["food", "shopping"],
   "icons": [
     {
-      "src": "./icon.svg",
-      "sizes": "any",
+      "src": "assets/branding/home-kitchen-icon-512.svg",
+      "sizes": "512x512",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "assets/branding/home-kitchen-maskable-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
-  ],
-  "id": "./",
-  "display_override": [
-    "standalone"
   ]
 }

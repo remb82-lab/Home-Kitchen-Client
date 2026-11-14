@@ -3,6 +3,12 @@
 (function(global){
   'use strict';
 
+  function plural(count,helpers){
+    var forms=['товар','товара','товаров'];
+    if(typeof helpers.countLabel==='function')return helpers.countLabel(count,forms);
+    return count+' '+forms[2];
+  }
+
   function mount(container,state,helpers){
     if(!container)return false;
 
@@ -11,11 +17,12 @@
     var items=Array.isArray(state.items)?state.items:[];
     var total=Number(state.total)||0;
     var count=Number(state.count)||0;
+    var hasItems=items.length>0;
 
-    var rows=items.length?items.map(function(item){
+    var rows=hasItems?items.map(function(item){
       return '<div class="cartitem" data-hk-cart-row="modular-v2" data-cart-index="'+item.index+'">'+
         '<img class="thumb" data-product-image src="'+escapeHtml(item.photo||'')+'" alt="'+escapeHtml(item.name||'')+'">'+
-        '<div>'+
+        '<div class="cartitem__info">'+
           '<div class="cname">'+escapeHtml(item.name||'')+'</div>'+
           '<div class="small">'+escapeHtml(item.weightLabel)+' · '+fmt(item.unitPrice)+'</div>'+
         '</div>'+
@@ -25,21 +32,28 @@
           '<button type="button" data-cart-action="increase" data-cart-index="'+item.index+'" aria-label="Увеличить количество">+</button>'+
         '</div>'+
       '</div>';
-    }).join(''):'<div class="empty">Корзина пуста</div>';
+    }).join(''):
+      '<div class="empty cart-empty"><b>Корзина пуста</b><span>Добавьте домашние полуфабрикаты из каталога.</span>'+
+      '<button class="checkout" type="button" data-cart-action="back">Перейти в каталог</button></div>';
 
     container.innerHTML=
       '<div class="detail-head">'+
         '<button class="back" type="button" data-cart-action="back">‹</button>'+
         '<h3>Корзина</h3>'+
-        '<button class="heart" type="button" data-cart-action="clear">Очистить</button>'+
+        (hasItems?'<button class="heart" type="button" data-cart-action="clear">Очистить</button>':'<span></span>')+
       '</div>'+
       '<div data-hk-cart-view="modular-v2">'+rows+'</div>'+
-      '<div class="totalbox">'+
-        '<div class="row"><span>Итого ('+count+' товара)</span><span class="grand">'+fmt(total)+'</span></div>'+
-      '</div>'+
-      '<button class="checkout" type="button" data-cart-action="checkout"'+(items.length?'':' disabled')+'>Оформить заказ</button>';
+      (hasItems?
+        '<button class="link-action" type="button" data-cart-action="back">‹ Продолжить покупки</button>'+
+        '<div class="cart-footer">'+
+          '<div class="totalbox">'+
+            '<div class="row"><span>Итого ('+plural(count,helpers)+')</span><span class="grand">'+fmt(total)+'</span></div>'+
+          '</div>'+
+          '<button class="checkout" type="button" data-cart-action="checkout">Оформить заказ</button>'+
+        '</div>'
+      :'');
 
-    container.addEventListener('click',function handler(event){
+    container.onclick=function(event){
       var button=event.target.closest('[data-cart-action]');
       if(!button||!container.contains(button))return;
       var action=button.dataset.cartAction;
@@ -50,7 +64,7 @@
       else if(action==='checkout')helpers.checkout();
       else if(action==='decrease')helpers.changeQty(index,-1);
       else if(action==='increase')helpers.changeQty(index,1);
-    },{once:true});
+    };
 
     return true;
   }

@@ -22,6 +22,10 @@
     return host;
   }
 
+  function displayNumber(order){
+    return String(order&&order.order_number||order&&order.id||'—');
+  }
+
   function renderCurrent(entry,helpers){
     var host=currentHost();
     if(!host)return false;
@@ -38,7 +42,7 @@
     host.innerHTML=
       '<div class="hk-current-order-card__head">'+
         '<div><span class="hk-current-order-card__eyebrow">'+(active?'ТЕКУЩИЙ ЗАКАЗ':'ПОСЛЕДНИЙ ЗАКАЗ')+'</span>'+
-        '<strong>Заказ '+helpers.escapeHtml(order.id||'')+'</strong></div>'+
+        '<strong>Заказ №'+helpers.escapeHtml(displayNumber(order))+'</strong></div>'+
         '<span class="hk-current-order-card__status">'+helpers.escapeHtml(helpers.statusText(order.status))+'</span>'+
       '</div>'+
       '<div class="hk-current-order-card__meta">'+
@@ -67,7 +71,7 @@
         : '';
 
       return '<div class="order" data-hk-order-card="modular-v2">'+
-        '<div class="row"><b>№ '+helpers.escapeHtml(order.id||'—')+'</b>'+
+        '<div class="row"><b>Заказ №'+helpers.escapeHtml(displayNumber(order))+'</b>'+
           '<span class="badge '+badgeClass+'">'+helpers.escapeHtml(helpers.statusText(status))+'</span></div>'+
         '<div class="small">'+helpers.escapeHtml(order.customer_name||helpers.profileName||'')+'</div>'+
         error+

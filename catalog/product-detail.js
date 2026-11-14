@@ -3,6 +3,10 @@
 (function(global){
   'use strict';
 
+  function weightLabel(grams){
+    return grams===500?'0,5 кг':'1 кг';
+  }
+
   function mount(container,product,productMeta,helpers){
     if(!container||!product)return false;
 
@@ -16,13 +20,12 @@
     var description=product.description||meta.local_description||'';
     var instruction=product.instruction||meta.instruction||'Инструкция уточняется.';
     var selectedGrams=1000;
-    var status=product.availability==='preorder'
-      ? '<span class="badge '+badgeClass(product)+'">Под заказ</span>'
-      : product.availability==='out_of_stock'
-        ? '<span class="badge '+badgeClass(product)+'">Нет в наличии</span>'
-        : '';
+    var pricePerKg=Number(product.price_kg)||0;
+    var status=product.availability==='out_of_stock'
+      ? '<span class="badge '+badgeClass(product)+'">Нет в наличии</span>'
+      : '';
     var preorder=product.availability==='preorder'
-      ? '<div class="notice hk-client-preorder">Приготовим после оформления заказа.</div>'
+      ? '<div class="notice hk-client-preorder">Готовим под заказ: приготовим после оформления заказа.</div>'
       : '';
     var contact=typeof helpers.contactMarkup==='function'?helpers.contactMarkup('detail'):'';
 
@@ -30,29 +33,30 @@
       '<div class="detail-head">'+
         '<button class="back" type="button" data-detail-action="back">‹</button>'+
         '<h3>'+escapeHtml(product.name)+'</h3>'+
-        '<span aria-hidden="true"></span>'+
+        '<button class="share" type="button" data-detail-action="share">Поделиться</button>'+
       '</div>'+
-      '<img class="detail-photo" data-product-image src="'+escapeHtml(photo)+'" alt="'+escapeHtml(product.name)+'">'+
+      '<div class="detail-photo-wrap"><img class="detail-photo" data-product-image src="'+escapeHtml(photo)+'" alt="'+escapeHtml(product.name)+'"></div>'+
       '<div class="detail" data-hk-product-detail="client-clean-v3">'+
         status+
         '<h1>'+escapeHtml(product.name)+'</h1>'+
         (description?'<div class="desc">'+escapeHtml(description)+'</div>':'')+
         '<div class="dprices dprices--kg-only">'+
-          '<div class="dprice dprice--primary"><span>Цена</span><b>'+fmt(product.price_kg)+' / кг</b></div>'+
+          '<div class="dprice dprice--primary"><b>'+fmt(pricePerKg)+'</b><span> / кг</span></div>'+
         '</div>'+
         '<div class="weight-picker" role="group" aria-label="Выберите вес">'+
           '<span class="weight-picker__label">Вес заказа</span>'+
           '<div class="weight-picker__options">'+
-            '<button type="button" data-detail-weight="500">0,5 кг</button>'+
-            '<button type="button" data-detail-weight="1000" class="active">1 кг</button>'+
+            '<button type="button" data-detail-weight="500" aria-pressed="false">0,5 кг</button>'+
+            '<button type="button" data-detail-weight="1000" class="active" aria-pressed="true">1 кг</button>'+
           '</div>'+
         '</div>'+
         '<div class="info hk-client-cooking"><b>Как приготовить</b><br>'+escapeHtml(instruction)+'</div>'+
-        contact+
         preorder+
+        contact+
         '<div class="actions hk-client-detail-actions">'+
-          '<button class="secondary" type="button" data-detail-action="share">Поделиться</button>'+
-          '<button class="primary" type="button" data-detail-action="cart"'+(product.availability==='out_of_stock'?' disabled':'')+'>🛒 В корзину</button>'+
+          '<div class="actions__price" aria-live="polite"><span data-detail-weight-label>'+weightLabel(selectedGrams)+'</span>'+
+            '<b data-detail-total>'+fmt(pricePerKg*selectedGrams/1000)+'</b></div>'+
+          '<button class="primary" type="button" data-detail-action="cart"'+(product.availability==='out_of_stock'?' disabled':'')+'>В корзину</button>'+
         '</div>'+
       '</div>';
 
@@ -63,8 +67,14 @@
       button.addEventListener('click',function(){
         selectedGrams=Number(button.dataset.detailWeight)===500?500:1000;
         container.querySelectorAll('[data-detail-weight]').forEach(function(item){
-          item.classList.toggle('active',item===button);
+          var active=item===button;
+          item.classList.toggle('active',active);
+          item.setAttribute('aria-pressed',active?'true':'false');
         });
+        var total=container.querySelector('[data-detail-total]');
+        var label=container.querySelector('[data-detail-weight-label]');
+        if(total)total.textContent=fmt(pricePerKg*selectedGrams/1000);
+        if(label)label.textContent=weightLabel(selectedGrams);
       });
     });
     var cart=container.querySelector('[data-detail-action="cart"]');

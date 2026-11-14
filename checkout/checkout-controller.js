@@ -12,6 +12,7 @@
   var PROFILE_KEY='client_api_profile';
   var ORDERS_KEY='client_api_orders';
   var CART_KEY='client_api_cart';
+  var currentSuccessRef=null;
 
   function formValuesFromDom(){
     return {
@@ -36,11 +37,13 @@
       {
         name:profile.name||'',
         phone:profile.phone||'',
-        total:typeof global.total==='function'?global.total():0
+        total:typeof global.total==='function'?global.total():0,
+        count:global.HKCartController&&typeof global.HKCartController.count==='function'?global.HKCartController.count():0
       },
       {
         escapeHtml:escapeHtml,
         fmt:fmt,
+        countLabel:global.countLabel,
         contactMarkup:function(variant){
           return global.HKClientContact&&typeof global.HKClientContact.markup==='function'
             ? global.HKClientContact.markup(variant)
@@ -77,6 +80,7 @@
     return {
       public_token:response.public_token,
       order:response.order,
+      details_pending:Boolean(response.details_pending),
       created_at:new Date().toISOString()
     };
   }
@@ -143,6 +147,7 @@
 
       if(typeof global.updateCart==='function')global.updateCart();
       showSuccessModular(ref,!historySaved||!cartSaved);
+      refreshCreatedOrder(ref,!historySaved||!cartSaved);
       if(typeof global.loadProducts==='function')global.loadProducts().catch(function(){});
     }catch(error){
       if(error.status===409){
@@ -185,7 +190,22 @@
     }
   }
 
-  function showSuccessModular(ref,historyWarning){
+  function refreshCreatedOrder(ref,historyWarning){
+    // The receipt and cleared cart are persisted before this optional read.
+    return global.HKClientApi.fetchOrder(ref.public_token).then(function(order){
+      if(!order)return;
+      ref.order=order;
+      ref.details_pending=false;
+      var saved=storeJson(ORDERS_KEY,orderRefs);
+      if(currentSuccessRef===ref){
+        showSuccessModular(ref,historyWarning||!saved,false);
+      }
+    }).catch(function(){
+      // History keeps the accepted receipt; its normal refresh can retry later.
+    });
+  }
+
+  function showSuccessModular(ref,historyWarning,navigate){
     var mounted=global.HKCheckoutView.mountSuccess(
       successContent,
       ref,
@@ -197,7 +217,12 @@
         go:go
       }
     );
-    if(mounted)go('successPage');
+    if(mounted){
+      if(navigate!==false){
+        currentSuccessRef=ref;
+        go('successPage');
+      }
+    }
   }
 
   global.openCheckout=openCheckoutModular;

@@ -40,6 +40,7 @@
     try{
       var order=await global.HKClientApi.fetchOrder(ref.public_token);
       ref.order=order;
+      ref.details_pending=false;
       ref.refresh_error='';
       ref.refreshed_at=new Date().toISOString();
       persist();
@@ -136,6 +137,5 @@
   });
 
   document.documentElement.dataset.hkOrdersArchitecture='modular-v2-client-copy';
-  renderOrdersModular();
-  refreshCurrentOrder();
+  // app/bootstrap starts rendering and refresh after Navigation is available.
 })(window);
