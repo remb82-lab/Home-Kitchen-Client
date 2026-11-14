@@ -52,8 +52,10 @@
   async function refreshCatalog(button){
     if(button){button.disabled=true;button.textContent='Обновляем…';}
     try{
-      if(typeof global.loadProducts==='function')await global.loadProducts();
-      if(typeof global.toast==='function')global.toast('Каталог обновлён',false);
+      var result=typeof global.loadProducts==='function'?await global.loadProducts():true;
+      if(result===false){
+        if(typeof global.toast==='function')global.toast('Не удалось обновить каталог',true);
+      }else if(typeof global.toast==='function')global.toast('Каталог обновлён',false);
     }catch(error){
       if(typeof global.toast==='function')global.toast('Не удалось обновить каталог',true);
     }finally{

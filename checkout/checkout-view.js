@@ -27,7 +27,7 @@
           '<span class="field-error" id="coNameErr" role="alert" hidden></span></label>'+
         '<label for="coPhone">Телефон или мессенджер'+
           '<input id="coPhone" name="tel" type="tel" inputmode="tel" autocomplete="tel" enterkeyhint="next" placeholder="+375 29 123-45-67" aria-describedby="coPhoneHint coPhoneErr" value="'+helpers.escapeHtml(state.phone||'')+'">'+
-          '<span class="field-hint" id="coPhoneHint">Чтобы кухня могла связаться с вами по заказу.</span>'+
+          '<span class="field-hint" id="coPhoneHint">Номер телефона или @ник в Telegram. Чтобы кухня могла связаться с вами по заказу.</span>'+
           '<span class="field-error" id="coPhoneErr" role="alert" hidden></span></label>'+
         '<label for="coComment">Комментарий'+
           '<textarea id="coComment" name="comment" rows="3" enterkeyhint="done" placeholder="Например, удобное время самовывоза"></textarea></label>'+

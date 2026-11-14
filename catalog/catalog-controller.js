@@ -8,6 +8,45 @@
     return;
   }
 
+  // Catalog load state: loading | ready | error. Never show the empty text before a load succeeds.
+  var catalogState = 'loading';
+  var inflight = null;
+  var autoRetryUsed = false;
+  var AUTO_RETRY_MS = 3000;
+
+  function skeletonMarkup() {
+    var cards = '';
+    for (var i = 0; i < 4; i++) {
+      cards += '<article class="product" data-phm-skeleton="true" aria-hidden="true">' +
+        '<div class="phm-skeleton" style="aspect-ratio:1/1;border-radius:0"></div>' +
+        '<div class="pbody"><div class="phm-skeleton" style="height:10px;width:42%;margin-bottom:8px"></div>' +
+        '<div class="phm-skeleton" style="height:13px;width:88%;margin-bottom:7px"></div>' +
+        '<div class="phm-skeleton" style="height:13px;width:65%;margin-bottom:12px"></div>' +
+        '<div class="phm-skeleton" style="height:12px;width:52%"></div></div></article>';
+    }
+    return cards;
+  }
+
+  function contactPhone() {
+    var c = global.HKClientContact;
+    if (!c || typeof c.get !== 'function' || typeof c.telHref !== 'function') return null;
+    var phone = (c.get() || {}).phone;
+    var href = phone ? c.telHref(phone) : '';
+    return href ? { phone: phone, href: href } : null;
+  }
+
+  function emptyMarkup() {
+    var call = contactPhone();
+    return '<div class="empty" style="grid-column:1/-1">Сейчас всё разобрали — скоро приготовим ещё.' +
+      (call ? '<br><a class="secondary" style="margin-top:12px" href="' + escapeHtml(call.href) + '">Позвонить</a>' : '') +
+      '</div>';
+  }
+
+  function errorMarkup() {
+    return '<div class="notice error" style="grid-column:1/-1" role="alert">Не удалось загрузить каталог. Проверьте интернет.' +
+      '<br><button class="primary" type="button" data-catalog-retry style="margin-top:12px;min-height:52px">Повторить</button></div>';
+  }
+
   function setBackendStatus(markup){
     var state=document.getElementById('backendState');
     if(state)state.innerHTML=markup;
@@ -132,6 +171,18 @@
   }
 
   function renderCatalogModular() {
+    if (catalogState === 'loading') {
+      catTitle.textContent = activeCat === 'Все' ? 'Каталог' : activeCat.replace(' и ', '/');
+      catCount.textContent = 'Загружаем каталог…';
+      grid.innerHTML = skeletonMarkup();
+      return;
+    }
+    if (catalogState === 'error') {
+      catTitle.textContent = 'Каталог';
+      catCount.textContent = '';
+      grid.innerHTML = errorMarkup();
+      return;
+    }
     var items = visibleProducts();
     catTitle.textContent = activeCat === 'Все' ? 'Каталог' : activeCat.replace(' и ', '/');
     var baseline = baselineAvailability();
@@ -149,18 +200,33 @@
           return PHOTOS[String(id)] || '';
         }
       });
-    }).join('') || '<div class="empty" style="grid-column:1/-1">Сейчас в этой категории ничего не опубликовано.</div>';
+    }).join('') || (PRODUCTS.length
+      ? '<div class="empty" style="grid-column:1/-1">Сейчас в этой категории ничего не опубликовано.</div>'
+      : emptyMarkup());
 
     updateCart();
   }
 
-  async function loadProductsModular() {
+  function loadContactInBackground() {
+    if (!global.HKClientContact || typeof global.HKClientContact.load !== 'function') return;
+    var done = function () {
+      // The empty state shows a call link only once the phone is known.
+      if (catalogState === 'ready' && !PRODUCTS.length) renderCatalogModular();
+    };
+    try {
+      // Not awaited: the catalog must render without waiting for the contact request.
+      Promise.resolve(global.HKClientContact.load()).catch(function () {}).then(done);
+    } catch (error) { /* contact is optional */ }
+  }
+
+  async function runLoad() {
+    catalogState = 'loading';
     setBackendStatus('<span class="dot"></span>Обновляем каталог…');
+    renderCatalogModular();
     try {
       PRODUCTS = await global.HKCatalogData.fetchProducts(global.HKClientApi.request);
-      if(global.HKClientContact&&typeof global.HKClientContact.load==='function'){
-        await global.HKClientContact.load();
-      }
+      catalogState = 'ready';
+      autoRetryUsed = false;
       cart = global.HKCatalogData.reconcileCart(cart, findProduct);
       storeJson('client_api_cart', cart);
       updateCart();
@@ -174,13 +240,39 @@
 
       renderFiltersModular();
       renderCatalogModular();
+      loadContactInBackground();
       return PRODUCTS;
     } catch (error) {
+      catalogState = 'error';
       setBackendStatus('<span class="dot bad"></span>Не удалось обновить каталог');
-      grid.innerHTML = '<div class="notice error" style="grid-column:1/-1">Не удалось загрузить каталог. Проверьте интернет и попробуйте обновить ещё раз.</div>';
-      catCount.textContent = '';
-      return [];
+      renderCatalogModular();
+      if (!autoRetryUsed) {
+        autoRetryUsed = true;
+        setTimeout(function () {
+          if (catalogState === 'error') loadProductsModular();
+        }, AUTO_RETRY_MS);
+      }
+      return false;
     }
+  }
+
+  // Resolves with the products array on success, false on failure (never rejects).
+  function loadProductsModular() {
+    if (!inflight) {
+      inflight = runLoad().then(function (result) { inflight = null; return result; },
+        function (error) { inflight = null; throw error; });
+    }
+    return inflight;
+  }
+
+  if (grid && typeof grid.addEventListener === 'function') {
+    grid.addEventListener('click', function (event) {
+      var retry = event.target && event.target.closest && event.target.closest('[data-catalog-retry]');
+      if (!retry) return;
+      event.preventDefault();
+      autoRetryUsed = false;
+      loadProductsModular();
+    });
   }
 
   global.categories = categoriesModular;

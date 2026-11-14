@@ -50,9 +50,9 @@
       '.hk-current-order-card{margin:12px 0 14px;padding:14px;background:var(--phm-surface,#fffdf8);border:1px solid var(--phm-line,#e5e1d7);border-radius:18px;box-shadow:0 6px 22px rgba(31,90,71,.06);color:var(--phm-text,#25312b)}'+
       '.hk-current-order-card__head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}'+
       '.hk-current-order-card__head>div{min-width:0}'+
-      '.hk-current-order-card__eyebrow{display:block;font-size:10px;line-height:1.2;font-weight:850;letter-spacing:.06em;color:var(--phm-muted,#737b76)}'+
+      '.hk-current-order-card__eyebrow{display:block;font-size:12px;line-height:1.2;font-weight:850;letter-spacing:.06em;color:var(--phm-muted,#737b76)}'+
       '.hk-current-order-card__head strong{display:block;margin-top:4px;font-size:16px;line-height:1.25;color:var(--phm-text,#25312b)}'+
-      '.hk-current-order-card__status{flex:0 0 auto;display:inline-flex;align-items:center;min-height:28px;padding:5px 9px;border-radius:999px;background:var(--phm-green-soft,#e7f1e6);color:var(--phm-green,#1f5a47);font-size:11px;line-height:1.2;font-weight:850;text-align:center}'+
+      '.hk-current-order-card__status{flex:0 0 auto;display:inline-flex;align-items:center;min-height:28px;padding:5px 9px;border-radius:999px;background:var(--phm-green-soft,#e7f1e6);color:var(--phm-green,#1f5a47);font-size:12px;line-height:1.2;font-weight:850;text-align:center}'+
       '.hk-current-order-card[data-status="cancelled"] .hk-current-order-card__status{background:#f9eaea;color:#a84a4a}'+
       '.hk-current-order-card__meta{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:11px;padding-top:10px;border-top:1px solid var(--phm-line,#e5e1d7);font-size:12px;line-height:1.35;color:var(--phm-muted,#737b76)}'+
       '.hk-current-order-card__meta b{color:var(--phm-text,#25312b);font-size:13px}'+
@@ -171,11 +171,45 @@
     }
   }
 
+  var repeatInFlight=new Set();
+  var repeatRecent=new Map();
+  var REPEAT_COOLDOWN_MS=2500;
+
+  function cleanCart(){
+    if(typeof cart==='undefined'||!Array.isArray(cart)) return;
+    for(var i=cart.length-1;i>=0;i--){
+      var row=cart[i];
+      if(!row||typeof row!=='object'||!Number(row.grams)||!(Number(row.qty)>0)) cart.splice(i,1);
+    }
+  }
+
+  function cartGramsFor(productId){
+    if(typeof cart==='undefined'||!Array.isArray(cart)) return 0;
+    return cart.reduce(function(sum,row){
+      return String(row.product_id)===String(productId)?sum+(Number(row.grams)||0)*(Number(row.qty)||0):sum;
+    },0);
+  }
+
   async function repeatOrder(index){
     if(typeof orderRefs==='undefined'||!Array.isArray(orderRefs)||!orderRefs[index]) return;
     var ref=orderRefs[index];
+    // Two buttons (current-order card and history) can fire for the same order; run it once.
+    var guardKey=String((ref&&ref.public_token)||index);
+    var lastRun=repeatRecent.get(guardKey);
+    if(repeatInFlight.has(guardKey)||(lastRun&&Date.now()-lastRun<REPEAT_COOLDOWN_MS)) return;
+    repeatInFlight.add(guardKey);
+    try{
+      await repeatOrderUnguarded(ref);
+    }finally{
+      repeatInFlight.delete(guardKey);
+      repeatRecent.set(guardKey,Date.now());
+    }
+  }
+
+  async function repeatOrderUnguarded(ref){
     var order=await fetchOrder(ref);
-    if(!order||!Array.isArray(order.items)||!order.items.length){
+    var orderItems=order&&Array.isArray(order.items)?order.items.filter(function(item){return item&&typeof item==='object'}):[];
+    if(!orderItems.length){
       if(typeof window.toast==='function') window.toast('Не удалось получить состав заказа',true);
       return;
     }
@@ -186,25 +220,40 @@
       return;
     }
 
+    cleanCart();
     var unavailable=[];
     var changedPrices=[];
+    var limited=[];
     var added=0;
-    order.items.forEach(function(item){
+    orderItems.forEach(function(item){
       var product=(typeof PRODUCTS!=='undefined'&&Array.isArray(PRODUCTS))
         ? PRODUCTS.find(function(p){return String(p.id)===String(item.product_id)})
         : null;
-      if(!product||String(product.availability||'')==='out_of_stock'){
+      if(!product||String(product.availability||'')==='out_of_stock'||!(Number(product.price_kg)>0)){
         unavailable.push(item.product_name||product?.name||('Товар '+item.product_id));
         return;
       }
       var requested=Math.max(0,Number(item.requested_grams)||0);
+      var label=item.product_name||product.name||('Товар '+item.product_id);
+      if(String(product.availability||'')==='in_stock'){
+        var free=Number(product.stock&&product.stock.free_grams)||0;
+        var room=Math.max(0,Math.floor((free-cartGramsFor(product.id))/500)*500);
+        if(requested>room){
+          limited.push(label);
+          requested=room;
+          if(!requested){
+            unavailable.push(label);
+            return;
+          }
+        }
+      }
       var oldLine=Number(item.line_total);
       var currentLine=requested>0 ? (requested/1000)*Number(product.price_kg||0) : 0;
-      if(Number.isFinite(oldLine)&&Math.abs(currentLine-oldLine)>0.009){
-        changedPrices.push(item.product_name||product.name||('Товар '+item.product_id));
+      if(Number.isFinite(oldLine)&&Math.abs(currentLine-oldLine)>0.009&&!limited.includes(label)){
+        changedPrices.push(label);
       }
       var before=typeof cart!=='undefined'&&Array.isArray(cart)?cart.reduce(function(s,row){return s+Number(row.qty||0)},0):0;
-      addRequestedGrams(product.id,item.requested_grams);
+      addRequestedGrams(product.id,requested);
       var after=typeof cart!=='undefined'&&Array.isArray(cart)?cart.reduce(function(s,row){return s+Number(row.qty||0)},0):before;
       added+=Math.max(0,after-before);
     });
@@ -221,6 +270,7 @@
     if(typeof window.toast==='function'){
       var notes=[];
       if(unavailable.length) notes.push('Недоступные позиции пропущены: '+unavailable.slice(0,3).join(', ')+(unavailable.length>3?'…':''));
+      if(limited.length) notes.push('Количество уменьшено по наличию: '+limited.slice(0,3).join(', ')+(limited.length>3?'…':''));
       if(changedPrices.length) notes.push('Цена изменилась: '+changedPrices.slice(0,3).join(', ')+(changedPrices.length>3?'…':''));
       window.toast(notes.length?notes.join(' · '):'Заказ добавлен в корзину по актуальной цене за кг',false);
     }
