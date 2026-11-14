@@ -13,6 +13,7 @@
   var ORDERS_KEY='client_api_orders';
   var CART_KEY='client_api_cart';
   var currentSuccessRef=null;
+  var checkoutOpenedAt=0;
 
   function formValuesFromDom(){
     return {
@@ -20,6 +21,10 @@
       phone:(document.getElementById('coPhone')?.value||'').trim(),
       comment:(document.getElementById('coComment')?.value||'').trim()
     };
+  }
+
+  function honeypotValue(){
+    try{return String(document.getElementById('coWebsite')?.value||'');}catch{return '';}
   }
 
   function checkoutItems(){
@@ -32,6 +37,7 @@
   }
 
   function openCheckoutModular(){
+    checkoutOpenedAt=Date.now();
     var mounted=global.HKCheckoutView.mountForm(
       checkoutContent,
       {
@@ -129,7 +135,9 @@
         comment:comment,
         items:items,
         idempotency_key:idempotencyKey,
-        turnstile_token:turnstileToken
+        turnstile_token:turnstileToken,
+        hp:honeypotValue(),
+        form_ms:checkoutOpenedAt?Date.now()-checkoutOpenedAt:undefined
       });
 
       profile={name:name,phone:phone};

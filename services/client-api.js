@@ -108,7 +108,9 @@
               comment:body.comment||'',
               items:body.items||[],
               idempotency_key:body.idempotency_key,
-              turnstile_token:body.turnstile_token||''
+              turnstile_token:body.turnstile_token||'',
+              hp:body.hp||'',
+              form_ms:body.form_ms
             })
           }
         );

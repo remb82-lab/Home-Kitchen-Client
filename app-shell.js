@@ -27,6 +27,7 @@
     return window.matchMedia && window.matchMedia('(display-mode: standalone)').matches ||
       window.matchMedia && window.matchMedia('(display-mode: fullscreen)').matches ||
       window.navigator.standalone === true ||
+      document.documentElement.classList.contains('in-telegram') ||
       document.referrer.indexOf('android-app://') === 0;
   }
 

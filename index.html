@@ -9,7 +9,7 @@
 :root{--hk-primary:#1f5a47;--hk-primary-pressed:#174536;--hk-primary-soft:#e7f1e6;--hk-cream:#f7f3e9;--hk-surface:#fffdf8;--hk-text:#25312b;--hk-muted:#5b665f;--hk-line:#e2dccf;--hk-danger:#9f2f2a;--hk-accent:#94491d;--hk-radius:16px;--hk-radius-sm:12px;--hk-space:12px;--hk-shadow:0 6px 20px rgba(31,90,71,.08);--hk-focus:rgba(31,90,71,.35);--hk-nav-h:64px;--hk-font-serif:Georgia,"Times New Roman",serif;--hk-font-sans:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
 *{box-sizing:border-box}html,body{margin:0;background:var(--hk-cream);color:var(--hk-text);font-family:var(--hk-font-sans);font-size:16px;line-height:1.4}button,input,textarea{font:inherit}.app{max-width:720px;margin:auto;min-height:100vh;padding:0 12px 96px}.page{display:none}.page.active{display:block}
 </style>
-<link rel="stylesheet" href="./premium-client.css?v=hk-ux-20261112">
+<link rel="stylesheet" href="./premium-client.css?v=hk-ux-20261114">
 </head>
 <body>
 <div class="app">
@@ -30,6 +30,8 @@
 <section id="successPage" class="page"><div id="successContent"></div></section>
 </div>
 <nav class="bottom" aria-label="Основная навигация"><button class="nav active" data-page="catalog" onclick="go('catalog')"><i>▦</i>Каталог</button><button class="nav" data-page="orders" onclick="go('orders')"><i>🧾</i>Заказы</button><button class="nav" data-page="profile" onclick="go('profile')"><i>👤</i>Профиль</button></nav>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="./runtime/telegram-shell.js?v=hk-ux-20261114"></script>
 <script src="./security/turnstile.js?v=hk-ux-20261112"></script>
-<script src="./premium-client-adapter.js?v=hk-ux-20261112"></script>
+<script src="./premium-client-adapter.js?v=hk-ux-20261114"></script>
 </body></html>
