@@ -36,13 +36,13 @@
     var fmt = helpers.fmt;
     var photoFor = helpers.photoFor;
     var id = Number(product.id);
-    var photo = product.image_url || photoFor(id) || 'assets/images/placeholders/product-photo-placeholder-c-v2.1.svg';
+    var photo = (window.HKProductPhoto ? window.HKProductPhoto(product) : product.image_url) || photoFor(id) || 'assets/images/placeholders/product-photo-placeholder-c-v2.1.svg';
     var canAdd = product.availability !== 'out_of_stock';
 
     return '<article class="product" data-hk-product-card="modular-v1" data-product-id="' + id +
       '" role="button" tabindex="0" aria-label="' + escapeHtml(product.name) + '" onclick="openDetail(' + id + ')">' +
       '<div class="photo-wrap">' +
-        '<img class="photo" src="' + escapeHtml(photo) + '" alt="' + escapeHtml(product.name) + '" loading="lazy">' +
+        '<img class="photo" data-product-id="' + id + '" src="' + escapeHtml(photo) + '" alt="' + escapeHtml(product.name) + '" loading="lazy">' +
         statusBadge(product, helpers.baseline) +
         (canAdd
           ? '<button type="button" class="quick-add" data-quick-add="' + id + '" aria-label="Добавить в корзину: ' +

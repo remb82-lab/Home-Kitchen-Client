@@ -27,7 +27,7 @@ input,textarea,select,#checkoutPage input,#checkoutPage textarea,#profile input,
 .quiet-action{display:block;min-height:44px;margin:14px auto 0;padding:0 14px;border:0;background:none;color:var(--hk-muted);font-size:14px;font-weight:600;text-decoration:underline;text-underline-offset:3px}
 
 /* ---- Header (catalog) ---------------------------------------------------- */
-.topbar{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:max(10px,env(safe-area-inset-top)) 2px 6px}
+.topbar{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:max(10px,env(safe-area-inset-top),var(--hk-top-inset,0px)) 2px 6px}
 .logo{display:grid;place-items:center;width:44px;height:44px;padding:4px;border:1px solid var(--hk-line);border-radius:14px;background:linear-gradient(145deg,#fff9eb,var(--hk-primary-soft));color:var(--hk-primary);font-size:24px}
 .logo img{display:block;width:34px;height:34px}
 .brand{font-family:var(--hk-font-serif);color:var(--hk-primary);font-weight:700;font-size:22px;line-height:1.1;letter-spacing:-.02em;white-space:nowrap}
@@ -50,7 +50,7 @@ input,textarea,select,#checkoutPage input,#checkoutPage textarea,#profile input,
 .client-order-phone .hk-icon{width:18px;height:18px}
 
 /* ---- Search + categories (sticky) ---------------------------------------- */
-.sticky{position:sticky;top:0;z-index:10;margin:0 -12px;padding:6px 12px 8px;background:linear-gradient(180deg,var(--hk-cream) 88%,rgba(247,243,233,0));backdrop-filter:blur(10px)}
+.sticky{position:sticky;top:var(--hk-top-inset,0px);z-index:10;margin:0 -12px;padding:6px 12px 8px;background:linear-gradient(180deg,var(--hk-cream) 88%,rgba(247,243,233,0));backdrop-filter:blur(10px)}
 .search{display:block;width:100%;min-height:46px;padding:0 14px;border:1px solid var(--hk-line);border-radius:14px;background:var(--hk-surface);outline:none;-webkit-appearance:none;appearance:none}
 .search:focus{border-color:var(--hk-primary);box-shadow:0 0 0 3px rgba(31,90,71,.15)}
 .search::placeholder{color:var(--hk-muted)}
@@ -95,7 +95,7 @@ input,textarea,select,#checkoutPage input,#checkoutPage textarea,#profile input,
 .nav:focus-visible{outline:3px solid var(--hk-focus);outline-offset:-3px}
 
 /* ---- Page heads (detail, cart, checkout, orders, profile) ---------------- */
-.detail-head{display:grid;grid-template-columns:44px minmax(0,1fr) minmax(44px,auto);align-items:center;gap:4px;min-height:56px;padding:max(8px,env(safe-area-inset-top)) 0 4px}
+.detail-head{display:grid;grid-template-columns:44px minmax(0,1fr) minmax(44px,auto);align-items:center;gap:4px;min-height:56px;padding:max(8px,env(safe-area-inset-top),var(--hk-top-inset,0px)) 0 4px}
 .detail-head h3{font-family:var(--hk-font-serif);font-size:19px;line-height:1.2;color:var(--hk-primary);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .back,.heart,.detail-head .share{display:grid;place-items:center;min-width:44px;min-height:44px;padding:0;border:0;background:transparent;color:var(--hk-primary);font-size:26px}
 .detail-head .share{border:0;font-size:14px}
@@ -211,7 +211,7 @@ button.back .hk-icon,button.share .hk-icon{width:22px;height:22px}
 #orders .status,#orders [class*="status"]:not(.statusline){display:inline-flex;align-items:center;min-height:26px;padding:4px 8px;border-radius:999px;background:var(--hk-primary-soft);color:var(--hk-primary);font-size:13px;font-weight:700}
 
 /* ---- Feedback ------------------------------------------------------------ */
-.hk-toast{position:fixed;width:max-content;z-index:2147483001;left:50%;top:calc(env(safe-area-inset-top) + 12px);max-width:min(92vw,420px);padding:12px 18px;border-radius:14px;background:var(--hk-text);color:#fff;font-size:15px;font-weight:600;line-height:1.35;text-align:center;box-shadow:0 12px 32px rgba(0,0,0,.22);opacity:0;pointer-events:none;transform:translate(-50%,-10px);transition:opacity .2s ease,transform .2s ease}
+.hk-toast{position:fixed;width:max-content;z-index:2147483001;left:50%;top:calc(max(env(safe-area-inset-top),var(--hk-top-inset,0px)) + 12px);max-width:min(92vw,420px);padding:12px 18px;border-radius:14px;background:var(--hk-text);color:#fff;font-size:15px;font-weight:600;line-height:1.35;text-align:center;box-shadow:0 12px 32px rgba(0,0,0,.22);opacity:0;pointer-events:none;transform:translate(-50%,-10px);transition:opacity .2s ease,transform .2s ease}
 .hk-toast--show{opacity:1;transform:translate(-50%,0)}
 .hk-toast--error{background:var(--hk-danger)}
 .phm-skeleton{position:relative;overflow:hidden;background:#e9e7e1;border-radius:12px;color:transparent!important}
@@ -230,3 +230,5 @@ img[data-phm-placeholder-active="true"]{object-fit:contain!important;object-posi
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 /* The product name is already the page title below the photo */
 #detailContent .detail-head h3{visibility:hidden}
+/* Telegram Mini App: solid band under Telegram's floating top controls (height from runtime/telegram-shell.js). */
+.in-telegram body::before{content:"";position:fixed;top:0;left:0;right:0;height:var(--hk-top-inset,0px);background:var(--hk-cream);z-index:11;pointer-events:none}

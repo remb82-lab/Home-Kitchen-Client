@@ -31,6 +31,8 @@
           '<span class="field-error" id="coPhoneErr" role="alert" hidden></span></label>'+
         '<label for="coComment">Комментарий'+
           '<textarea id="coComment" name="comment" rows="3" enterkeyhint="done" placeholder="Например, удобное время самовывоза"></textarea></label>'+
+        '<div aria-hidden="true" style="position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden">'+
+          '<label for="coWebsite">Website<input id="coWebsite" name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" value=""></label></div>'+
       '</div>'+
       contact+
       '<div class="totalbox">'+

@@ -16,7 +16,7 @@
     var badgeClass=helpers.badgeClass;
     var meta=productMeta||{};
     var id=Number(product.id);
-    var photo=product.image_url||photoFor(id)||'assets/images/placeholders/product-photo-placeholder-c-v2.1.svg';
+    var photo=(window.HKProductPhoto?window.HKProductPhoto(product):product.image_url)||photoFor(id)||'assets/images/placeholders/product-photo-placeholder-c-v2.1.svg';
     var description=product.description||meta.local_description||'';
     var instruction=product.instruction||meta.instruction||'Инструкция уточняется.';
     var selectedGrams=1000;
@@ -35,7 +35,7 @@
         '<h3>'+escapeHtml(product.name)+'</h3>'+
         '<button class="share" type="button" data-detail-action="share">Поделиться</button>'+
       '</div>'+
-      '<div class="detail-photo-wrap"><img class="detail-photo" data-product-image src="'+escapeHtml(photo)+'" alt="'+escapeHtml(product.name)+'"></div>'+
+      '<div class="detail-photo-wrap"><img class="detail-photo" data-product-image data-product-id="'+id+'" src="'+escapeHtml(photo)+'" alt="'+escapeHtml(product.name)+'"></div>'+
       '<div class="detail" data-hk-product-detail="client-clean-v3">'+
         status+
         '<h1>'+escapeHtml(product.name)+'</h1>'+

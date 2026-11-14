@@ -5,7 +5,7 @@ OUTPUT_ROOT="${OUTPUT_ROOT:-_site}"
 
 required=(
   index.html premium-client.css premium-client-adapter.js app-shell.js app-shell.css app-sw.js manifest.webmanifest client-repeat-order-adapter.js
-  data/product-media.js runtime/client-runtime.js services/client-api.js security/turnstile.js contact/client-contact.js
+  data/product-media.js runtime/client-runtime.js runtime/telegram-shell.js services/client-api.js security/turnstile.js contact/client-contact.js
   catalog/catalog-data.js catalog/product-card.js catalog/product-detail.js catalog/catalog-controller.js catalog/product-share.js
   cart/cart-view.js cart/cart-controller.js checkout/checkout-view.js checkout/checkout-controller.js
   orders/orders-view.js orders/orders-controller.js profile/profile-view.js profile/profile-controller.js
@@ -27,7 +27,8 @@ grep -q "appearance:'interaction-only'" "$OUTPUT_ROOT/security/turnstile.js"
 grep -q "execution:'execute'" "$OUTPUT_ROOT/security/turnstile.js"
 grep -q 'turnstile_token' "$OUTPUT_ROOT/checkout/checkout-controller.js"
 grep -q 'security/turnstile.js' "$OUTPUT_ROOT/index.html"
-grep -q 'v18' "$OUTPUT_ROOT/app-sw.js"
+grep -q 'v19' "$OUTPUT_ROOT/app-sw.js"
+grep -q 'runtime/telegram-shell.js' "$OUTPUT_ROOT/index.html"
 
 grep -q 'data-quick-add' "$OUTPUT_ROOT/catalog/product-card.js"
 ! grep -q '<span>Цена</span>' "$OUTPUT_ROOT/catalog/product-card.js"

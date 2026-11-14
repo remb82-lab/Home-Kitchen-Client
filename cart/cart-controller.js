@@ -92,7 +92,7 @@
         index:index,
         productId:Number(item.product_id),
         name:String(productItem.name||''),
-        photo:productItem.image_url||PHOTOS[String(productItem.id)]||'',
+        photo:(window.HKProductPhoto?window.HKProductPhoto(productItem):productItem.image_url)||PHOTOS[String(productItem.id)]||'',
         grams:grams,
         weightLabel:(grams/1000).toFixed(1).replace('.0','').replace('.',',')+' кг',
         qty:Number(item.qty)||0,
