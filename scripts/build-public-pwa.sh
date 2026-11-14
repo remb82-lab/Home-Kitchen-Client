@@ -27,7 +27,7 @@ grep -q "appearance:'interaction-only'" "$OUTPUT_ROOT/security/turnstile.js"
 grep -q "execution:'execute'" "$OUTPUT_ROOT/security/turnstile.js"
 grep -q 'turnstile_token' "$OUTPUT_ROOT/checkout/checkout-controller.js"
 grep -q 'security/turnstile.js' "$OUTPUT_ROOT/index.html"
-grep -q 'v19' "$OUTPUT_ROOT/app-sw.js"
+grep -q 'v21' "$OUTPUT_ROOT/app-sw.js"
 grep -q 'runtime/telegram-shell.js' "$OUTPUT_ROOT/index.html"
 
 grep -q 'data-quick-add' "$OUTPUT_ROOT/catalog/product-card.js"

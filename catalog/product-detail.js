@@ -49,6 +49,7 @@
             '<button type="button" data-detail-weight="500" aria-pressed="false">0,5 кг</button>'+
             '<button type="button" data-detail-weight="1000" class="active" aria-pressed="true">1 кг</button>'+
           '</div>'+
+          '<span class="weight-picker__hint">Цена указана за 1 кг</span>'+
         '</div>'+
         '<div class="info hk-client-cooking"><b>Как приготовить</b><br>'+escapeHtml(instruction)+'</div>'+
         preorder+
@@ -75,12 +76,23 @@
         var label=container.querySelector('[data-detail-weight-label]');
         if(total)total.textContent=fmt(pricePerKg*selectedGrams/1000);
         if(label)label.textContent=weightLabel(selectedGrams);
+        syncCartButton();
       });
     });
     var cart=container.querySelector('[data-detail-action="cart"]');
+    var addedGrams={};
+    function syncCartButton(){
+      if(!cart)return;
+      var inCart=Boolean(addedGrams[selectedGrams]);
+      cart.textContent=inCart?'В корзине · Перейти':'В корзину';
+      cart.classList.toggle('is-in-cart',inCart);
+    }
     if(cart)cart.addEventListener('click',function(){
+      if(addedGrams[selectedGrams]){helpers.openCart();return;}
       helpers.addCart(id,selectedGrams);
-      helpers.openCart();
+      addedGrams[selectedGrams]=true;
+      syncCartButton();
+      if(typeof window.toast==='function')window.toast('Добавлено в корзину',false);
     });
     var share=container.querySelector('[data-detail-action="share"]');
     if(share)share.addEventListener('click',function(){helpers.shareProduct(id);});

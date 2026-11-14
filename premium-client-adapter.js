@@ -15,20 +15,20 @@
     {src:'contact/client-contact.js?v=hk-ux-20261112',marker:'data-hk-client-contact'},
     {src:'catalog/catalog-data.js?v=sto6-20260901',marker:'data-hk-catalog-data'},
     {src:'catalog/product-card.js?v=hk-ux-20261114',marker:'data-hk-product-card'},
-    {src:'catalog/product-detail.js?v=hk-ux-20261114',marker:'data-hk-product-detail'},
-    {src:'catalog/catalog-controller.js?v=hk-ux-20261112',marker:'data-hk-catalog-controller'},
+    {src:'catalog/product-detail.js?v=hk-ux-20261115',marker:'data-hk-product-detail'},
+    {src:'catalog/catalog-controller.js?v=hk-ux-20261115',marker:'data-hk-catalog-controller'},
     {src:'catalog/product-share.js?v=sto6-phase10-20260901',marker:'data-hk-product-share'},
     {src:'cart/cart-view.js?v=hk-ux-20261112',marker:'data-hk-cart-view'},
     {src:'cart/cart-controller.js?v=hk-ux-20261114',marker:'data-hk-cart-controller'},
-    {src:'checkout/checkout-view.js?v=hk-ux-20261114',marker:'data-hk-checkout-view'},
+    {src:'checkout/checkout-view.js?v=hk-ux-20261115',marker:'data-hk-checkout-view'},
     {src:'checkout/checkout-controller.js?v=hk-ux-20261114',marker:'data-hk-checkout-controller'},
     {src:'orders/orders-view.js?v=sto6-phase5-20260901',marker:'data-hk-orders-view'},
-    {src:'orders/orders-controller.js?v=sto6-phase5-20260901',marker:'data-hk-orders-controller'},
+    {src:'orders/orders-controller.js?v=hk-ux-20261115',marker:'data-hk-orders-controller'},
     {src:'profile/profile-view.js?v=sto6-phase6-20260901',marker:'data-hk-profile-view'},
-    {src:'profile/profile-controller.js?v=hk-ux-20261112',marker:'data-hk-profile-controller'},
+    {src:'profile/profile-controller.js?v=hk-ux-20261115',marker:'data-hk-profile-controller'},
     {src:'app/app-state.js?v=sto6-phase8-20260901',marker:'data-hk-app-state'},
     {src:'app/navigation-controller.js?v=sto6-phase8-20260901',marker:'data-hk-navigation-controller'},
-    {src:'app/bootstrap.js?v=sto6-phase10-20260901',marker:'data-hk-client-bootstrap'}
+    {src:'app/bootstrap.js?v=hk-ux-20261115',marker:'data-hk-client-bootstrap'}
   ];
   var catalogModulesPromise=null;
 

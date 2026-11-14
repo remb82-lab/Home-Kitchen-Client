@@ -2,7 +2,7 @@
    Network-first by design: when online, the installed app always prefers the
    current deployed web version. Cached responses are offline fallback only. */
 const CACHE_PREFIX = 'hk-client-pwa-';
-const CACHE_NAME = `${CACHE_PREFIX}v19`;
+const CACHE_NAME = `${CACHE_PREFIX}v21`;
 const CORE_ASSETS = [
   './',
   './manifest.webmanifest',
